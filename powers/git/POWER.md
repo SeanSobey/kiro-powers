@@ -1,6 +1,6 @@
 ---
-name: "git-mcp"
-displayName: "Git MCP"
+name: "git"
+displayName: "Git"
 description: "Comprehensive Git operations via MCP. Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, and more — all from your AI assistant."
 keywords: ["git", "version-control", "repository", "commits", "branches"]
 author: "Sean Sobey"

@@ -1,6 +1,6 @@
 ---
-name: "github-mcp"
-displayName: "GitHub MCP"
+name: "github"
+displayName: "GitHub"
 description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, code search, and Copilot agent integration from your AI assistant."
 keywords: ["github", "pull-request", "issues", "repository", "code-review"]
 author: "Sean Sobey"

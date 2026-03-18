@@ -38,7 +38,7 @@ Documentation: [context7.com](https://context7.com)
 
 ---
 
-### Git MCP
+### Git
 
 Comprehensive Git operations via MCP. Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, worktrees, and more.
 
@@ -56,7 +56,7 @@ Steering files:
 
 ---
 
-### GitHub MCP
+### GitHub
 
 Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, code search, and Copilot agent integration.
 
