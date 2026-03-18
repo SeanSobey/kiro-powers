@@ -1,6 +1,6 @@
 # Kiro Powers
 
-A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assistant with MCP-based tools for browser automation, Git, GitHub, npm, and library documentation lookup.
+A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assistant with MCP-based tools for browser automation, Git, GitHub, npm, library documentation, charts, file management, PDF reading, YouTube, and Notion.
 
 ## Powers
 
