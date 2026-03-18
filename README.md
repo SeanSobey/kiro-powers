@@ -4,6 +4,21 @@ A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assis
 
 ## Powers
 
+| Power | Description |
+|-------|-------------|
+| [Chart Generator](#chart-generator) | Generate charts using Chart.js v4 — bar, line, pie, radar, scatter, and more |
+| [Chrome DevTools](#chrome-devtools-mcp) | Control Chrome — navigate, click, screenshot, Lighthouse audits, performance tracing |
+| [Context7](#context7) | Look up live documentation and code examples for any library or framework |
+| [Filesystem](#filesystem) | Sandboxed local file operations — read, write, move, search, and manage files |
+| [Git](#git) | Comprehensive Git operations — clone, commit, branch, diff, rebase, stash, and more |
+| [GitHub](#github) | Full GitHub platform — repos, issues, PRs, releases, code search, Copilot |
+| [Notion](#notion) | Notion workspace — pages, databases, blocks, comments, users, and search |
+| [npm](#npm) | npm package management — search, install, audit, bundle size, licenses |
+| [PDF Reader](#pdf-reader) | Read and extract content from PDFs — text, pages, metadata, tables, images |
+| [YouTube](#youtube) | YouTube platform — search videos, transcripts, channels, and playlists |
+
+---
+
 ### Chrome DevTools MCP
 
 Control Chrome from your AI assistant. Navigate pages, click elements, fill forms, take screenshots, inspect network requests, run Lighthouse audits, and trace performance.
