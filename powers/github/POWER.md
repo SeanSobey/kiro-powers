@@ -1,8 +1,8 @@
 ---
 name: "github"
 displayName: "GitHub"
-description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, code search, and Copilot agent integration from your AI assistant."
-keywords: ["github", "pull-request", "issues", "repository", "code-review"]
+description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, and projects from your AI assistant."
+keywords: ["github", "pull-request", "issues", "repository", "code-review", "releases", "labels", "milestones", "actions", "workflows", "gists", "collaborators", "tags", "projects"]
 author: "Sean Sobey"
 ---
 
@@ -10,15 +10,15 @@ author: "Sean Sobey"
 
 ## Overview
 
-GitHub MCP provides comprehensive access to the GitHub platform through the Model Context Protocol. It covers the full GitHub workflow — repositories, issues, pull requests, branches, releases, code search, file management, and even GitHub Copilot agent delegation.
+GitHub MCP provides comprehensive access to the GitHub platform through the Model Context Protocol. It covers the full GitHub workflow — repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, and projects.
 
-This power enables your AI assistant to interact with GitHub without leaving your editor: create PRs, review code, manage issues, search across repositories, and automate release workflows.
+This power combines the `@modelcontextprotocol/server-github` package with a custom `github-extras` server that fills in the gaps — label CRUD, milestones, releases, GitHub Actions, gists, collaborators, tags, and projects.
 
 ## Available Steering Files
 
 - **pull-requests** — Creating, reviewing, merging PRs, and code review workflows
-- **issues-and-projects** — Issue management, labels, sub-issues, and search patterns
-- **advanced-operations** — Releases, tags, Copilot agent delegation, secret scanning, and repository management
+- **issues-and-projects** — Issue management, labels, milestones, projects, and search patterns
+- **advanced-operations** — Releases, tags, workflows/actions, gists, collaborators, and repository management
 
 ## Onboarding
 
@@ -32,9 +32,12 @@ This power enables your AI assistant to interact with GitHub without leaving you
 1. Go to https://github.com/settings/tokens
 2. Click "Generate new token" → "Generate new token (classic)"
 3. Select scopes based on what you need:
-   - `repo` — Full repository access (issues, PRs, code)
+   - `repo` — Full repository access (issues, PRs, code, labels, milestones, collaborators)
    - `read:org` — Read org and team membership
    - `read:user` — Read user profile data
+   - `workflow` — Trigger and manage GitHub Actions workflows
+   - `gist` — Create and list gists
+   - `project` — Manage projects
 4. Copy the generated token
 
 ### Configuration
@@ -130,10 +133,177 @@ get_commit with owner="user", repo="my-repo", sha="abc1234"
 search_users with query="location:seattle followers:>100"
 ```
 
+### Create a Label
+
+```
+create_label with owner="user", repo="my-repo", name="bug", color="d73a4a", description="Something isn't working"
+```
+
+The `color` parameter is a 6-character hex string without the `#` prefix.
+
+### List Labels
+
+```
+list_labels with owner="user", repo="my-repo"
+```
+
+### Update a Label
+
+```
+update_label with owner="user", repo="my-repo", current_name="bug", new_name="bugfix", color="e4e669"
+```
+
+### Delete a Label
+
+```
+delete_label with owner="user", repo="my-repo", name="obsolete-label"
+```
+
 ### Fork a Repository
 
 ```
 fork_repository with owner="original-owner", repo="cool-project"
+```
+
+### Milestones
+
+**Create:**
+```
+create_milestone with owner="user", repo="my-repo", title="v1.0", due_on="2025-12-31T00:00:00Z"
+```
+
+**List:**
+```
+list_milestones with owner="user", repo="my-repo", state="open"
+```
+
+**Update:**
+```
+update_milestone with owner="user", repo="my-repo", milestone_number=1, state="closed"
+```
+
+**Delete:**
+```
+delete_milestone with owner="user", repo="my-repo", milestone_number=1
+```
+
+### Releases
+
+**Create:**
+```
+create_release with owner="user", repo="my-repo", tag_name="v1.0.0", name="Version 1.0", generate_release_notes=true
+```
+
+**List:**
+```
+list_releases with owner="user", repo="my-repo"
+```
+
+**Get by tag:**
+```
+get_release with owner="user", repo="my-repo", tag="v1.0.0"
+```
+
+**Delete:**
+```
+delete_release with owner="user", repo="my-repo", release_id=12345
+```
+
+### Workflows / Actions
+
+**List workflows:**
+```
+list_workflows with owner="user", repo="my-repo"
+```
+
+**List runs (optionally filtered):**
+```
+list_workflow_runs with owner="user", repo="my-repo", workflow_id="ci.yml", status="failure"
+```
+
+**Get run details:**
+```
+get_workflow_run with owner="user", repo="my-repo", run_id=123456
+```
+
+**Trigger a workflow:**
+```
+trigger_workflow with owner="user", repo="my-repo", workflow_id="deploy.yml", ref="main", inputs={"environment": "production"}
+```
+
+### Gists
+
+**Create:**
+```
+create_gist with description="My snippet", files={"example.js": {"content": "console.log('hi')"}}, public=true
+```
+
+**List:**
+```
+list_gists
+```
+
+### Collaborators
+
+**List:**
+```
+list_collaborators with owner="user", repo="my-repo"
+```
+
+**Add:**
+```
+add_collaborator with owner="user", repo="my-repo", username="contributor", permission="push"
+```
+
+**Remove:**
+```
+remove_collaborator with owner="user", repo="my-repo", username="contributor"
+```
+
+### Tags
+
+**List:**
+```
+list_tags with owner="user", repo="my-repo"
+```
+
+**Create annotated tag:**
+```
+create_tag with owner="user", repo="my-repo", tag="v1.0.0", message="Release 1.0", sha="abc1234"
+```
+
+**Delete:**
+```
+delete_tag with owner="user", repo="my-repo", tag="v1.0.0"
+```
+
+### Projects
+
+**List org projects:**
+```
+list_org_projects with org="my-org"
+```
+
+**List repo projects:**
+```
+list_repo_projects with owner="user", repo="my-repo"
+```
+
+**Create org project:**
+```
+create_org_project with org="my-org", title="Q1 Roadmap", body="Planning for Q1"
+```
+
+**Create repo project:**
+```
+create_repo_project with owner="user", repo="my-repo", title="Sprint 1"
+```
+
+**Get / Update / Delete by ID:**
+```
+get_project with project_id=12345
+update_project with project_id=12345, title="Updated Title", state="closed"
+delete_project with project_id=12345
 ```
 
 ## Troubleshooting
@@ -176,10 +346,10 @@ fork_repository with owner="original-owner", repo="cool-project"
 - **How to get it:**
   1. Go to https://github.com/settings/tokens
   2. Click "Generate new token (classic)"
-  3. Select required scopes (`repo`, `read:org`, `read:user`)
+  3. Select required scopes (`repo`, `read:org`, `read:user`, `workflow`, `gist`, `project`)
   4. Copy the token and paste it as the value
 
 ---
 
-**Package:** `@modelcontextprotocol/server-github`
-**MCP Server:** github
+**Packages:** `@modelcontextprotocol/server-github` + custom `github-extras`
+**MCP Servers:** github, github-extras

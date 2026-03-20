@@ -15,6 +15,7 @@ A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assis
 | [Notion](#notion) | Notion workspace — pages, databases, blocks, comments, users, and search |
 | [npm](#npm) | npm package management — search, install, audit, bundle size, licenses |
 | [PDF Reader](#pdf-reader) | Read and extract content from PDFs — text, pages, metadata, tables, images |
+| [MarkItDown](#markitdown) | Convert Word, PDF, PowerPoint, Excel, and 20+ formats to Markdown |
 | [YouTube](#youtube) | YouTube platform — search videos, transcripts, channels, and playlists |
 
 ---
@@ -159,6 +160,25 @@ Full Notion workspace operations via MCP. Manage pages, databases, blocks, comme
 Steering files:
 - `databases-and-pages` — Creating, querying, and managing databases and pages with property schemas
 - `blocks-and-content` — Working with block content, comments, and advanced content manipulation
+
+---
+
+### MarkItDown
+
+Convert Word documents, PDFs, PowerPoint, Excel, images, audio, HTML, and 20+ other file formats to Markdown. Powered by Microsoft's MarkItDown library.
+
+| | |
+|---|---|
+| MCP Server | `markitdown` |
+| Package | Custom server wrapping [`markitdown`](https://github.com/microsoft/markitdown) |
+| Command | `uvx --with markitdown[all] --with mcp[cli] mcp run server.py` |
+| Prerequisites | Python 3.10+, [uv](https://docs.astral.sh/uv/getting-started/installation/) |
+| Env vars | None |
+
+Writes converted Markdown directly to disk and returns only a confirmation with file path and preview — avoids flooding AI context with large documents.
+
+Steering files:
+- `convert-and-save` — Default convert-and-write-to-file workflow, batch conversion, output path conventions
 
 ---
 

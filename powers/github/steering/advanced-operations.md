@@ -2,19 +2,34 @@
 
 ## Releases
 
+### Create a release
+```
+create_release with owner="user", repo="my-repo", tag_name="v2.0.0", name="Version 2.0", generate_release_notes=true
+```
+
+### Create a draft pre-release
+```
+create_release with owner="user", repo="my-repo", tag_name="v2.0.0-rc.1", name="2.0 Release Candidate", draft=true, prerelease=true
+```
+
 ### List releases
 ```
 list_releases with owner="user", repo="my-repo"
 ```
 
-### Get latest release
-```
-get_latest_release with owner="user", repo="my-repo"
-```
-
 ### Get release by tag
 ```
-get_release_by_tag with owner="user", repo="my-repo", tag="v2.0.0"
+get_release with owner="user", repo="my-repo", tag="v2.0.0"
+```
+
+### Get release by ID
+```
+get_release with owner="user", repo="my-repo", release_id=12345
+```
+
+### Delete a release
+```
+delete_release with owner="user", repo="my-repo", release_id=12345
 ```
 
 ## Tags
@@ -24,9 +39,114 @@ get_release_by_tag with owner="user", repo="my-repo", tag="v2.0.0"
 list_tags with owner="user", repo="my-repo"
 ```
 
-### Get tag details
+### Create an annotated tag
 ```
-get_tag with owner="user", repo="my-repo", tag="v1.0.0"
+create_tag with owner="user", repo="my-repo", tag="v1.0.0", message="Release 1.0.0", sha="abc1234"
+```
+
+### Delete a tag
+```
+delete_tag with owner="user", repo="my-repo", tag="v1.0.0"
+```
+
+## Milestones
+
+### Create a milestone
+```
+create_milestone with owner="user", repo="my-repo", title="v2.0", description="Major release", due_on="2025-12-31T00:00:00Z"
+```
+
+### List milestones
+```
+list_milestones with owner="user", repo="my-repo", state="open", sort="due_on"
+```
+
+### Update a milestone
+```
+update_milestone with owner="user", repo="my-repo", milestone_number=1, state="closed"
+```
+
+### Delete a milestone
+```
+delete_milestone with owner="user", repo="my-repo", milestone_number=1
+```
+
+## Workflows / GitHub Actions
+
+### List workflows in a repo
+```
+list_workflows with owner="user", repo="my-repo"
+```
+
+### List workflow runs
+```
+list_workflow_runs with owner="user", repo="my-repo"
+```
+
+### List runs for a specific workflow
+```
+list_workflow_runs with owner="user", repo="my-repo", workflow_id="ci.yml"
+```
+
+### Filter runs by status and branch
+```
+list_workflow_runs with owner="user", repo="my-repo", workflow_id="ci.yml", status="failure", branch="main"
+```
+
+### Get run details
+```
+get_workflow_run with owner="user", repo="my-repo", run_id=123456
+```
+
+### Trigger a workflow dispatch
+```
+trigger_workflow with owner="user", repo="my-repo", workflow_id="deploy.yml", ref="main", inputs={"environment": "production"}
+```
+
+## Gists
+
+### Create a public gist
+```
+create_gist with description="Debug helper", files={"debug.js": {"content": "console.log('debug')"}}, public=true
+```
+
+### Create a private gist with multiple files
+```
+create_gist with description="Config templates", files={"dev.json": {"content": "{}"}, "prod.json": {"content": "{}"}}, public=false
+```
+
+### List your gists
+```
+list_gists
+```
+
+### List gists updated since a date
+```
+list_gists with since="2025-01-01T00:00:00Z"
+```
+
+## Collaborators
+
+### List collaborators
+```
+list_collaborators with owner="user", repo="my-repo"
+```
+
+### List outside collaborators only
+```
+list_collaborators with owner="user", repo="my-repo", affiliation="outside"
+```
+
+### Add a collaborator
+```
+add_collaborator with owner="user", repo="my-repo", username="contributor", permission="push"
+```
+
+Permission levels: `pull`, `triage`, `push`, `maintain`, `admin`
+
+### Remove a collaborator
+```
+remove_collaborator with owner="user", repo="my-repo", username="contributor"
 ```
 
 ## Repository Management
@@ -34,11 +154,6 @@ get_tag with owner="user", repo="my-repo", tag="v1.0.0"
 ### Create a repository
 ```
 create_repository with name="my-new-project", description="A cool project", private=true, autoInit=true
-```
-
-### Create in an organization
-```
-create_repository with name="team-tool", organization="my-org", private=true, autoInit=true
 ```
 
 ### Fork a repository
@@ -51,19 +166,12 @@ fork_repository with owner="original-owner", repo="cool-project"
 fork_repository with owner="original-owner", repo="cool-project", organization="my-org"
 ```
 
-### Delete a file
-```
-delete_file with owner="user", repo="my-repo", path="old-config.json", message="chore: remove deprecated config", branch="main"
-```
-
 ## Secret Scanning
 
 Scan files for accidentally committed secrets:
 ```
 run_secret_scanning with owner="user", repo="my-repo", files=["content of file 1", "content of file 2"]
 ```
-
-This scans raw file contents (not paths) for API keys, passwords, tokens, and credentials. Use it before committing sensitive files or when reviewing diffs.
 
 ## Copilot Agent
 
@@ -90,35 +198,34 @@ get_copilot_job_status with owner="user", repo="my-repo", id="job-id-or-pr-numbe
    ```
 2. Check the latest release:
    ```
-   get_latest_release with owner="user", repo="my-repo"
+   list_releases with owner="user", repo="my-repo", per_page=1
    ```
-3. Create a branch for release prep:
+3. Create a tag:
    ```
-   create_branch with owner="user", repo="my-repo", branch="release/2.1.0"
+   create_tag with owner="user", repo="my-repo", tag="v2.1.0", message="Release 2.1.0", sha="abc1234"
    ```
-4. Push changelog updates:
+4. Create the release with auto-generated notes:
    ```
-   create_or_update_file with owner="user", repo="my-repo", path="CHANGELOG.md", content="...", message="docs: update changelog for v2.1.0", branch="release/2.1.0"
+   create_release with owner="user", repo="my-repo", tag_name="v2.1.0", name="Version 2.1.0", generate_release_notes=true
    ```
-5. Create PR for review:
-   ```
-   create_pull_request with owner="user", repo="my-repo", title="Release 2.1.0", head="release/2.1.0", base="main"
-   ```
-6. After merge, tag will trigger release pipeline
 
-## Security Audit Pattern
+## CI/CD Monitoring Pattern
 
-1. Search for potential secrets in code:
+1. List workflows to find the right one:
    ```
-   search_code with query="password OR api_key OR secret repo:user/my-repo"
+   list_workflows with owner="user", repo="my-repo"
    ```
-2. Scan suspicious files:
+2. Check recent failures:
    ```
-   run_secret_scanning with owner="user", repo="my-repo", files=["file contents..."]
+   list_workflow_runs with owner="user", repo="my-repo", workflow_id="ci.yml", status="failure"
    ```
-3. Create issues for findings:
+3. Get details on a failed run:
    ```
-   issue_write with method="create", owner="user", repo="my-repo", title="Security: rotate exposed API key", labels=["security", "priority-critical"]
+   get_workflow_run with owner="user", repo="my-repo", run_id=123456
+   ```
+4. Re-trigger after a fix:
+   ```
+   trigger_workflow with owner="user", repo="my-repo", workflow_id="ci.yml", ref="main"
    ```
 
 ## Cross-Repository Operations

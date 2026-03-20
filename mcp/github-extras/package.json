@@ -1,0 +1,13 @@
+{
+  "name": "github-extras-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for GitHub APIs not covered by @modelcontextprotocol/server-github",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}
