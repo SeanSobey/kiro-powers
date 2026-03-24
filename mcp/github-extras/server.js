@@ -707,6 +707,49 @@ server.tool(
   }
 );
 
+// ─── Issues Summary ──────────────────────────────────────────────────────────
+
+server.tool(
+  "list_issues_summary",
+  "List GitHub issues returning only number, title, and labels (lightweight summary)",
+  {
+    owner: z.string().describe("Repository owner"),
+    repo: z.string().describe("Repository name"),
+    state: z.enum(["open", "closed", "all"]).optional().describe("Filter by state (default: open)"),
+    labels: z.string().optional().describe("Comma-separated list of label names"),
+    assignee: z.string().optional().describe("Filter by assignee username"),
+    milestone: z.number().optional().describe("Filter by milestone number"),
+    sort: z.enum(["created", "updated", "comments"]).optional().describe("Sort field"),
+    direction: z.enum(["asc", "desc"]).optional().describe("Sort direction"),
+    per_page: z.number().optional().describe("Results per page (max 100)"),
+    page: z.number().optional().describe("Page number"),
+  },
+  async ({ owner, repo, state, labels, assignee, milestone, sort, direction, per_page, page }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const params = new URLSearchParams();
+    if (state) params.set("state", state);
+    if (labels) params.set("labels", labels);
+    if (assignee) params.set("assignee", assignee);
+    if (milestone) params.set("milestone", String(milestone));
+    if (sort) params.set("sort", sort);
+    if (direction) params.set("direction", direction);
+    if (per_page) params.set("per_page", String(per_page));
+    if (page) params.set("page", String(page));
+    const qs = params.toString();
+    const res = await ghFetch(`/repos/${owner}/${repo}/issues${qs ? `?${qs}` : ""}`);
+    const data = await res.json();
+    if (!res.ok) return apiError(res.status, data);
+    const issues = data
+      .filter((i) => !i.pull_request)
+      .map((i) => ({
+        number: i.number,
+        title: i.title,
+        labels: i.labels.map((l) => ({ name: l.name, color: l.color })),
+      }));
+    return ok(issues);
+  }
+);
+
 // ─── Transport ───────────────────────────────────────────────────────────────
 
 const transport = new StdioServerTransport();

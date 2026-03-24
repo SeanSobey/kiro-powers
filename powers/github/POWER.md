@@ -1,7 +1,7 @@
 ---
 name: "github"
 displayName: "GitHub"
-description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, and projects from your AI assistant."
+description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, projects, and lightweight issue summaries from your AI assistant."
 keywords: ["github", "pull-request", "issues", "repository", "code-review", "releases", "labels", "milestones", "actions", "workflows", "gists", "collaborators", "tags", "projects"]
 author: "Sean Sobey"
 ---
@@ -12,7 +12,7 @@ author: "Sean Sobey"
 
 GitHub MCP provides comprehensive access to the GitHub platform through the Model Context Protocol. It covers the full GitHub workflow — repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, and projects.
 
-This power combines the `@modelcontextprotocol/server-github` package with a custom `github-extras` server that fills in the gaps — label CRUD, milestones, releases, GitHub Actions, gists, collaborators, tags, and projects.
+This power combines the `@modelcontextprotocol/server-github` package with a custom `github-extras` server that fills in the gaps — label CRUD, milestones, releases, GitHub Actions, gists, collaborators, tags, projects, and a lightweight issues summary tool.
 
 ## Available Steering Files
 
@@ -275,6 +275,25 @@ create_tag with owner="user", repo="my-repo", tag="v1.0.0", message="Release 1.0
 **Delete:**
 ```
 delete_tag with owner="user", repo="my-repo", tag="v1.0.0"
+```
+
+### Issues Summary
+
+**List issues (lightweight):**
+```
+list_issues_summary with owner="user", repo="my-repo"
+```
+
+Returns only `number`, `title`, and `labels` (name + color) for each issue. Pull requests are excluded.
+
+**Filter by state and labels:**
+```
+list_issues_summary with owner="user", repo="my-repo", state="open", labels="bug,urgent"
+```
+
+**Filter by assignee or milestone:**
+```
+list_issues_summary with owner="user", repo="my-repo", assignee="octocat", milestone=3
 ```
 
 ### Projects
