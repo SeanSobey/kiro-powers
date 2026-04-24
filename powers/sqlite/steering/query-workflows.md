@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Query Workflows
 
 ## Data Exploration

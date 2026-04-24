@@ -2,7 +2,7 @@
   "mcpServers": {
     "git": {
       "command": "npx",
-      "args": ["-y", "@cyanheads/git-mcp-server"]
+      "args": ["-y", "@cyanheads/git-mcp-server@latest"]
     }
   }
 }

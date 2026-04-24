@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Testing and Debugging
 
 ## E2E Testing Patterns

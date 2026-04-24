@@ -37,6 +37,44 @@ Default config works out of the box. Optional flags can be added to `args`:
 - `--config <path>` — path to config file
 
 
+## Configuration Examples
+
+**Headless mode (no visible browser window):**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"]
+    }
+  }
+}
+```
+
+**Use Firefox instead of Chromium:**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--browser", "firefox"]
+    }
+  }
+}
+```
+
+**Headless Firefox:**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--browser", "firefox", "--headless"]
+    }
+  }
+}
+```
+
 ## Common Workflows
 
 ### Take an Accessibility Snapshot (Preferred)

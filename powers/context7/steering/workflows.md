@@ -1,22 +1,24 @@
+---
+inclusion: manual
+---
+
 # Context7 Workflows
 
-## Angular-Specific Lookups
+## Common Documentation Lookups
 
-Since this workspace is an Angular project, here are common Context7 queries for Angular development:
-
-### Angular Core
+### Framework Documentation
 ```
-resolve-library-id with libraryName="angular"
-get-library-docs with context7CompatibleLibraryID="/angular/angular", topic="signals and computed values"
+resolve-library-id with libraryName="next.js"
+get-library-docs with context7CompatibleLibraryID="/vercel/next.js", topic="app router middleware"
 ```
 
-### Angular Material
+### UI Library Documentation
 ```
-resolve-library-id with libraryName="angular material"
-get-library-docs with context7CompatibleLibraryID="/angular/components", topic="mat-table with sorting and pagination"
+resolve-library-id with libraryName="react"
+get-library-docs with context7CompatibleLibraryID="/facebook/react", topic="useEffect cleanup function"
 ```
 
-### RxJS (commonly used with Angular)
+### Utility Library Documentation
 ```
 resolve-library-id with libraryName="rxjs"
 get-library-docs with context7CompatibleLibraryID="/reactivex/rxjs", topic="switchMap vs mergeMap operators"
@@ -32,16 +34,16 @@ When researching a complex topic, chain queries to build understanding:
 2. Narrow down — query specific APIs or patterns
 3. Get examples — ask for implementation examples
 
-**Example: Setting up Angular SSR**
+**Example: Setting up SSR with Next.js**
 ```
 # Step 1: Overview
 get-library-docs topic="server side rendering setup"
 
 # Step 2: Specific API
-get-library-docs topic="provideServerRendering and hydration"
+get-library-docs topic="getServerSideProps and data fetching"
 
 # Step 3: Examples
-get-library-docs topic="SSR with express server example"
+get-library-docs topic="SSR with dynamic routes example"
 ```
 
 ### Migration Guides
@@ -49,8 +51,8 @@ get-library-docs topic="SSR with express server example"
 Context7 is great for finding migration patterns between versions:
 
 ```
-get-library-docs topic="migrate from NgModules to standalone components"
-get-library-docs topic="migrate from HttpClientModule to provideHttpClient"
+get-library-docs topic="migrate from pages router to app router"
+get-library-docs topic="migrate from CommonJS to ESM"
 ```
 
 ### Finding Alternatives
@@ -98,5 +100,5 @@ Before adding a new package:
 ```
 resolve-library-id with libraryName="zod"
 get-library-docs topic="basic schema validation setup with TypeScript"
-get-library-docs topic="form validation with zod and Angular reactive forms"
+get-library-docs topic="form validation with zod"
 ```

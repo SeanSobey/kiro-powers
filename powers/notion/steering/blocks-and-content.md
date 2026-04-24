@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Blocks and Content
 
 ## Working with Blocks

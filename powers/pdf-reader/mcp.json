@@ -2,7 +2,7 @@
   "mcpServers": {
     "pdf-reader": {
       "command": "npx",
-      "args": ["@sylphx/pdf-reader-mcp@latest"],
+      "args": ["-y", "@sylphx/pdf-reader-mcp@latest"],
       "autoApprove": ["read_pdf"]
     }
   }

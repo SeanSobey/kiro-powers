@@ -305,5 +305,5 @@ No additional configuration required — works after the MCP server is installed
 
 ---
 
-**Package:** `@anthropic/npm-mcp-server`
+**Package:** `@anthropic/npm-mcp-server` (verify this package exists on npm before use — it may have been renamed or unpublished)
 **MCP Server:** npm

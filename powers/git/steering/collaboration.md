@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Git Collaboration
 
 ## Remote Management

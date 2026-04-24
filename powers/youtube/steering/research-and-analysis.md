@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Research and Analysis
 
 ## Video Research Workflow

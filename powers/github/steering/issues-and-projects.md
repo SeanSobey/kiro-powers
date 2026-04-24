@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Issues and Projects
 
 ## Creating Issues

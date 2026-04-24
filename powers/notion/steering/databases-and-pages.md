@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Databases and Pages
 
 ## Working with Databases

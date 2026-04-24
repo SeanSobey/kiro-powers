@@ -311,5 +311,5 @@ No additional configuration required — works after the MCP server is installed
 
 ---
 
-**Package:** `@anthropic/chrome-devtools-mcp`
+**Package:** `chrome-devtools-mcp`
 **MCP Server:** chrome-devtools

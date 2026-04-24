@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Advanced GitHub Operations
 
 ## Releases

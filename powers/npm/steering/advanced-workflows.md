@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Advanced npm Workflows
 
 ## Workspaces (Monorepo)

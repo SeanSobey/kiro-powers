@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Advanced Git Workflows
 
 ## Stashing

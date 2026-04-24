@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Advanced Operations
 
 ## Batch File Operations

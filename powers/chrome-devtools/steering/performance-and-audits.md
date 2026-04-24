@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Performance and Audits
 
 ## Lighthouse Audits
