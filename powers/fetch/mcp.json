@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "fetch-nodejs": {
+      "disabled": true,
+      "command": "npx",
+      "args": ["-y", "fetch-mcp@latest"],
+      "autoApprove": ["fetch_url"]
+    },
+    "fetch": {
+      "url": "http://localhost:3000/fetch/mcp",
+      "autoApprove": ["fetch_url"]
+    }
+  }
+}
+

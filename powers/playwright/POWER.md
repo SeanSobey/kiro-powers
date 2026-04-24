@@ -1,8 +1,9 @@
 ---
 name: "playwright"
+version: "1.0.0"
 displayName: "Playwright"
 description: "Browser automation via Playwright MCP. Navigate pages, click elements, fill forms, take screenshots, capture accessibility snapshots, and run JavaScript in real browsers from your AI assistant."
-keywords: ["playwright", "browser", "automation", "testing", "web", "screenshot", "e2e"]
+keywords: ["@playwright"]
 author: "Microsoft"
 ---
 
@@ -35,6 +36,8 @@ Default config works out of the box. Optional flags can be added to `args`:
 - `--headless` — run in headless mode
 - `--port <number>` — run as SSE server instead of stdio
 - `--config <path>` — path to config file
+
+This power is disabled by default. Enable it in `mcp.json` to run on the host via stdio. A Docker config exists commented out in `docker-compose.yml` using a lightweight Chromium-only image.
 
 
 ## Configuration Examples

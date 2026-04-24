@@ -1,8 +1,9 @@
 ---
 name: "npm"
+version: "1.0.0"
 displayName: "npm"
 description: "npm package management via MCP. Search, install, update, audit, analyze dependencies, check bundle sizes, and manage licenses — all from your AI assistant."
-keywords: ["npm", "node-packages", "dependencies", "package-json", "node-modules"]
+keywords: ["@npm"]
 author: "Sean Sobey"
 ---
 
@@ -301,9 +302,9 @@ npm install
 
 ## Configuration
 
-No additional configuration required — works after the MCP server is installed.
+This power is disabled by default. Enable it in `mcp.json` to run on the host via stdio. A Docker config exists commented out in `docker-compose.yml`.
 
 ---
 
-**Package:** `@anthropic/npm-mcp-server` (verify this package exists on npm before use — it may have been renamed or unpublished)
+**Package:** `npmplus-mcp-server`
 **MCP Server:** npm

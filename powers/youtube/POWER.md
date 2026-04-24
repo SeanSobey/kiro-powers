@@ -1,8 +1,9 @@
 ---
 name: "youtube"
+version: "1.0.1"
 displayName: "YouTube"
 description: "YouTube platform operations via MCP. Search videos, get video details, read transcripts, explore channels, and browse playlists from your AI assistant."
-keywords: ["youtube", "video", "transcript", "channel", "playlist"]
+keywords: ["@youtube"]
 author: "Kiro Community"
 ---
 
@@ -23,7 +24,7 @@ This power enables your AI assistant to search for videos, pull transcripts for 
 ### Prerequisites
 - A Google account
 - A YouTube Data API v3 key
-- Node.js 18+ (for npx)
+- Docker (default) or Node.js 18+ (local fallback)
 
 ### Getting Your YouTube API Key
 
@@ -38,6 +39,8 @@ This power enables your AI assistant to search for videos, pull transcripts for 
 ### Configuration
 
 After installing this power, replace `YOUR_YOUTUBE_API_KEY_HERE` in `mcp.json` with your actual API key.
+
+The default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. Set your API key in `.env`. A disabled `youtube-nodejs` entry in `mcp.json` is available for local stdio fallback.
 
 ## Common Workflows
 
@@ -168,4 +171,5 @@ playlists_getPlaylistItems with playlistId="PLxxxxxxxxxxxxxxxxxxxxxx", maxResult
 ---
 
 **Package:** `@sfiorini/youtube-mcp`
+**Transport:** Streamable HTTP via Docker (default) or stdio (local)
 **MCP Server:** youtube

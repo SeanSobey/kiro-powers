@@ -1,8 +1,9 @@
 ---
 name: "chart"
+version: "1.0.1"
 displayName: "Chart Generator"
 description: "Generate charts using Chart.js via MCP. Create bar, line, pie, doughnut, radar, scatter, and bubble charts as PNG images, interactive HTML, or raw JSON config."
-keywords: ["chart", "chartjs", "visualization", "graph", "diagram"]
+keywords: ["@chart"]
 author: "Kiro Community"
 ---
 
@@ -17,10 +18,16 @@ This power is useful for visualizing data from reports, creating dashboards, gen
 ## Onboarding
 
 ### Prerequisites
-- Node.js 18+ (for npx)
+- Docker (default) or Node.js 18+ (local fallback)
 
 ### Configuration
-No API keys or credentials required. Works out of the box after installation.
+
+Default config connects to Docker via Streamable HTTP — no local setup needed. Run `docker compose up -d` from the repo root.
+
+A disabled `chart-nodejs` entry in `mcp.json` is available for local stdio fallback.
+
+### Staging Workflow
+This power runs in Docker. When using `saveToFile=true` for PNG output, files must be saved under `/staging/` to be accessible on the host. See the **staging** steering file for the full workflow — the AI reads `STAGING_DIR` from `${powerDir}/../../.env` at runtime to discover the host path. For `html` and `json` output formats, content is returned directly over MCP — no staging needed.
 
 ## Common Workflows
 

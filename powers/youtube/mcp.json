@@ -1,11 +1,16 @@
 {
   "mcpServers": {
-    "youtube": {
+    "youtube-nodejs": {
+      "disabled": true,
       "command": "npx",
       "args": ["-y", "@sfiorini/youtube-mcp@latest"],
       "env": {
         "YOUTUBE_API_KEY": "YOUR_YOUTUBE_API_KEY_HERE"
       }
+    },
+    "youtube": {
+      "url": "http://localhost:3000/youtube/mcp"
     }
   }
 }
+

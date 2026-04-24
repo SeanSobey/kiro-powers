@@ -1,8 +1,9 @@
 ---
 name: "notion"
+version: "1.0.1"
 displayName: "Notion"
 description: "Full Notion workspace operations via MCP. Manage pages, databases, blocks, comments, users, and search across your Notion workspace from your AI assistant."
-keywords: ["notion", "notion-api", "workspace", "wiki", "knowledge-base"]
+keywords: ["@notion"]
 author: "Kiro Community"
 ---
 
@@ -24,7 +25,7 @@ This power enables your AI assistant to interact with your Notion workspace with
 ### Prerequisites
 - A Notion account
 - A Notion Internal Integration (API key)
-- Node.js 18+ (for npx)
+- Docker (default) or Node.js 18+ (local fallback)
 
 ### Creating a Notion Integration
 
@@ -55,6 +56,8 @@ Any child pages under a shared parent page are also accessible.
 ### Configuration
 
 After installing this power, replace `YOUR_NOTION_API_KEY_HERE` in `mcp.json` with your actual integration secret.
+
+The default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. Set your API key in `.env`. A disabled `notionApi-nodejs` entry in `mcp.json` is available for local stdio fallback.
 
 ## Common Workflows
 

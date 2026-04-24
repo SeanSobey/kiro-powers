@@ -1,0 +1,252 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MCP Power Servers — served over HTTP via supergateway (stdio → Streamable HTTP)
+# behind a single nginx reverse proxy on port 3000.
+#
+# Tiers:
+#   API-only    — Pure network services, no host access needed
+#   Staging     — Read/write via shared /staging volume
+#   CDP         — Connects to host Chrome via DevTools Protocol
+#
+# Host-only powers (disabled here, run via stdio on host):
+#   docx-reader, filesystem, git, npm, playwright, sqlite
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in your API keys
+#   2. docker compose build
+#   3. docker compose up -d
+#   4. Powers connect to http://localhost:3000/<server-name>/mcp
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-node-service: &node-service
+  restart: unless-stopped
+  build:
+    context: .
+    dockerfile: docker/node.Dockerfile
+  expose:
+    - "8000"
+
+services:
+  # ── nginx reverse proxy ──────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - chart
+      - chrome-devtools
+      - context7
+      - fetch
+      - github
+      - github-extras
+      - markitdown
+      - notion
+      - pdf-reader
+      - youtube
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # API-only — no host access needed
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # ── context7 ─────────────────────────────────────────────────────────────
+  context7:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "@upstash/context7-mcp@latest"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/context7-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    environment:
+      CONTEXT7_API_KEY: ${CONTEXT7_API_KEY:-}
+
+  # ── fetch ────────────────────────────────────────────────────────────────
+  fetch:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "fetch-mcp@latest"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/fetch-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+
+  # ── github ───────────────────────────────────────────────────────────────
+  github:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "@modelcontextprotocol/server-github"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-github", "--outputTransport", "streamableHttp", "--port", "8000"]
+    environment:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
+
+  # ── github-extras (local server) ────────────────────────────────────────
+  github-extras:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/local-server.Dockerfile
+      args:
+        SERVER_DIR: mcp/github-extras
+    expose:
+      - "8000"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /app/server.js", "--outputTransport", "streamableHttp", "--port", "8000"]
+    environment:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
+
+  # ── notion ───────────────────────────────────────────────────────────────
+  notion:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "@notionhq/notion-mcp-server"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/notion-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+    environment:
+      OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer ${NOTION_API_KEY}","Notion-Version":"2022-06-28"}'
+
+  # ── youtube ──────────────────────────────────────────────────────────────
+  youtube:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/youtube.Dockerfile
+    expose:
+      - "8000"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/youtube-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    environment:
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Staging — shared /staging volume for file I/O
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # ── chart ────────────────────────────────────────────────────────────────
+  chart:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "@ax-crew/chartjs-mcp-server@latest"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chartjs-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+    volumes:
+      - ${STAGING_DIR}/chart:/staging
+
+  # ── markitdown (Python + Node) ──────────────────────────────────────────
+  markitdown:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/markitdown.Dockerfile
+    expose:
+      - "8000"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000"]
+    volumes:
+      - ${STAGING_DIR}/markitdown:/staging
+
+  # ── pdf-reader ───────────────────────────────────────────────────────────
+  pdf-reader:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "@sylphx/pdf-reader-mcp@latest"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/pdf-reader-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    volumes:
+      - ${STAGING_DIR}/pdf-reader:/staging
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CDP — connects to host browser
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # ── chrome-devtools ──────────────────────────────────────────────────────
+  chrome-devtools:
+    <<: *node-service
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+      args:
+        MCP_PACKAGE: "chrome-devtools-mcp@latest"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chrome-devtools-mcp --no-usage-statistics", "--outputTransport", "streamableHttp", "--port", "8000"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Disabled — host-only powers, uncomment + add to nginx depends_on to enable
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # ── docx-reader (local server) ──────────────────────────────────────────
+  # docx-reader:
+  #   restart: unless-stopped
+  #   build:
+  #     context: .
+  #     dockerfile: docker/local-server.Dockerfile
+  #     args:
+  #       SERVER_DIR: mcp/docx-reader
+  #   expose:
+  #     - "8000"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /app/server.js", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   volumes:
+  #     - ${STAGING_DIR}/docx-reader:/staging
+
+  # ── filesystem ───────────────────────────────────────────────────────────
+  # filesystem:
+  #   <<: *node-service
+  #   build:
+  #     context: .
+  #     dockerfile: docker/node.Dockerfile
+  #     args:
+  #       MCP_PACKAGE: "@modelcontextprotocol/server-filesystem@latest"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-filesystem /workspace", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   volumes:
+  #     - D:/Projects:/workspace/projects
+  #     - D:/Data:/workspace/data
+
+  # ── git ──────────────────────────────────────────────────────────────────
+  # git:
+  #   <<: *node-service
+  #   build:
+  #     context: .
+  #     dockerfile: docker/node.Dockerfile
+  #     args:
+  #       MCP_PACKAGE: "@cyanheads/git-mcp-server@latest"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/git-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+
+  # ── npm ──────────────────────────────────────────────────────────────────
+  # npm:
+  #   <<: *node-service
+  #   build:
+  #     context: .
+  #     dockerfile: docker/node.Dockerfile
+  #     args:
+  #       MCP_PACKAGE: "npmplus-mcp-server@latest"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/npmplus-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+
+  # ── playwright ───────────────────────────────────────────────────────────
+  # playwright:
+  #   restart: unless-stopped
+  #   build:
+  #     context: .
+  #     dockerfile: docker/playwright-local.Dockerfile
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-playwright --cdp-endpoint http://host.docker.internal:9222", "--outputTransport", "streamableHttp", "--port", "8000"]
+
+  # ── sqlite ───────────────────────────────────────────────────────────────
+  # sqlite:
+  #   <<: *node-service
+  #   build:
+  #     context: .
+  #     dockerfile: docker/node.Dockerfile
+  #     args:
+  #       MCP_PACKAGE: "mcp-sqlite"
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-sqlite /data/database.sqlite", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   volumes:
+  #     - D:/Databases/myapp:/data/myapp

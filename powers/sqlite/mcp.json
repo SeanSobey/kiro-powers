@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "SQLite Server": {
+      "disabled": true,
       "command": "npx",
       "args": ["-y", "mcp-sqlite", "YOUR_SQLITE_DATABASE_PATH_HERE"]
     }

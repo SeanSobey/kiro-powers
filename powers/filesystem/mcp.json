@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "filesystem": {
+      "disabled": true,
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem@latest", "YOUR_ALLOWED_DIRECTORY_HERE"]
     }

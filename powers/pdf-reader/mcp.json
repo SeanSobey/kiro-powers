@@ -1,9 +1,15 @@
 {
   "mcpServers": {
-    "pdf-reader": {
+    "pdf-reader-nodejs": {
+      "disabled": true,
       "command": "npx",
       "args": ["-y", "@sylphx/pdf-reader-mcp@latest"],
+      "autoApprove": ["read_pdf"]
+    },
+    "pdf-reader": {
+      "url": "http://localhost:3000/pdf-reader/mcp",
       "autoApprove": ["read_pdf"]
     }
   }
 }
+

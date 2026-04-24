@@ -1,8 +1,9 @@
 ---
 name: "context7"
+version: "1.0.1"
 displayName: "Context7"
 description: "Up-to-date library documentation and code examples via Context7 MCP. Resolve library IDs and query current docs for any npm package, framework, or language library."
-keywords: ["context7", "documentation", "docs", "library", "api", "examples", "code-examples", "packages"]
+keywords: ["@context7"]
 author: "Sean Sobey"
 ---
 
@@ -25,7 +26,7 @@ This is especially useful when:
 ## Onboarding
 
 ### Prerequisites
-- Node.js and npx installed
+- Docker (default) or Node.js (local fallback)
 
 ### How It Works
 
@@ -144,7 +145,7 @@ Fetches documentation and code examples for a resolved library.
 
 ## Configuration
 
-No additional configuration required beyond the MCP server installation. The server runs via npx and fetches documentation on demand.
+Default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. A disabled `context7-nodejs` entry in `mcp.json` is available for local stdio fallback.
 
 If you have a Context7 API key, you can pass it as an argument:
 ```

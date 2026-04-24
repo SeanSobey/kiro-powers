@@ -1,225 +1,291 @@
 # Kiro Powers
 
-A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assistant with MCP-based tools for browser automation, Git, GitHub, npm, library documentation, charts, file management, PDF reading, YouTube, and Notion.
+A collection of custom [Kiro](https://kiro.dev) powers that extend your AI assistant with MCP-based tools — served over HTTP via Docker or locally via stdio.
+
+## Architecture
+
+Powers run as MCP servers inside Docker containers, exposed over Streamable HTTP through an nginx reverse proxy on port 3000. Each power's `mcp.json` connects to `http://localhost:3000/<server>/mcp` by default, with a disabled stdio fallback for running locally.
+
+```
+Kiro IDE → http://localhost:3000/<power>/mcp → nginx → supergateway → MCP server
+```
+
+### Tiers
+
+| Tier | Powers | Description |
+|------|--------|-------------|
+| API-only | context7, fetch, github, github-extras, notion, youtube | Pure network services, no host access needed |
+| Staging | chart, markitdown, pdf-reader | Read/write files via a shared staging volume |
+| CDP | chrome-devtools | Connects to Chrome on the host via DevTools Protocol |
+| Host-only | docx-reader, filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
+
+## Quick Start
+
+1. Copy `.env.example` to `.env` and fill in your API keys and staging path
+2. Build: `docker compose build`
+3. Start: `docker compose up -d`
+4. Install powers into Kiro from the `powers/` directory
 
 ## Powers
 
-| Power | Description |
-|-------|-------------|
-| [Chart Generator](#chart-generator) | Generate charts using Chart.js v4 — bar, line, pie, radar, scatter, and more |
-| [Chrome DevTools](#chrome-devtools-mcp) | Control Chrome — navigate, click, screenshot, Lighthouse audits, performance tracing |
-| [Context7](#context7) | Look up live documentation and code examples for any library or framework |
-| [Filesystem](#filesystem) | Sandboxed local file operations — read, write, move, search, and manage files |
-| [Git](#git) | Comprehensive Git operations — clone, commit, branch, diff, rebase, stash, and more |
-| [GitHub](#github) | Full GitHub platform — repos, issues, PRs, releases, code search, Copilot |
-| [Notion](#notion) | Notion workspace — pages, databases, blocks, comments, users, and search |
-| [npm](#npm) | npm package management — search, install, audit, bundle size, licenses |
-| [PDF Reader](#pdf-reader) | Read and extract content from PDFs — text, pages, metadata, tables, images |
-| [MarkItDown](#markitdown) | Convert Word, PDF, PowerPoint, Excel, and 20+ formats to Markdown |
-| [YouTube](#youtube) | YouTube platform — search videos, transcripts, channels, and playlists |
+| Power | Transport | Description |
+|-------|-----------|-------------|
+| [Chart Generator](#chart-generator) | Docker (staging) | Generate charts using Chart.js v4 |
+| [Chrome DevTools](#chrome-devtools) | Docker (CDP) | Control Chrome — navigate, click, screenshot, Lighthouse |
+| [Context7](#context7) | Docker | Live documentation and code examples for any library |
+| [Docx Reader](#docx-reader) | Host (disabled) | Read, write, search, merge, and convert Word documents |
+| [Fetch](#fetch) | Docker | Fetch and extract content from URLs |
+| [Filesystem](#filesystem) | Host (disabled) | Sandboxed local file operations |
+| [Git](#git) | Host (disabled) | Comprehensive Git operations |
+| [GitHub](#github) | Docker | Full GitHub platform — repos, issues, PRs, releases |
+| [MarkItDown](#markitdown) | Docker (staging) | Convert 20+ file formats to Markdown |
+| [Notion](#notion) | Docker | Notion workspace — pages, databases, blocks, search |
+| [npm](#npm) | Host (disabled) | npm package management |
+| [PDF Reader](#pdf-reader) | Docker (staging) | Extract text, metadata, tables, images from PDFs |
+| [Playwright](#playwright) | Host (disabled) | Browser automation via Playwright |
+| [SQLite](#sqlite) | Host (disabled) | SQLite database operations |
+| [YouTube](#youtube) | Docker | YouTube — search, transcripts, channels, playlists |
 
 ---
 
-### Chrome DevTools MCP
-
-Control Chrome from your AI assistant. Navigate pages, click elements, fill forms, take screenshots, inspect network requests, run Lighthouse audits, and trace performance.
-
-| | |
-|---|---|
-| MCP Server | `chrome-devtools` |
-| Package | [`chrome-devtools-mcp`](https://www.npmjs.com/package/chrome-devtools-mcp) |
-| Command | `npx -y chrome-devtools-mcp@latest --no-usage-statistics` |
-| Prerequisites | Google Chrome or Chromium, Node.js 18+ |
-| Env vars | None |
-
-Steering files:
-- `testing-and-debugging` — E2E testing patterns, debugging console errors, network inspection, form testing
-- `performance-and-audits` — Lighthouse audits, performance tracing, Core Web Vitals, emulation
-
----
+## Docker Powers
 
 ### Context7
 
-Look up live, up-to-date documentation and code examples for any library or framework directly from your AI assistant.
+Live documentation and code examples for any library or framework.
 
 | | |
 |---|---|
-| MCP Server | `context7` |
 | Package | [`@upstash/context7-mcp`](https://www.npmjs.com/package/@upstash/context7-mcp) |
-| Command | `npx -y @upstash/context7-mcp@latest` |
-| Prerequisites | Node.js 18+ |
-| Env vars | None |
+| URL | `http://localhost:3000/context7/mcp` |
+| Env vars | `CONTEXT7_API_KEY` (optional) |
 
-Documentation: [context7.com](https://context7.com)
+### Fetch
 
----
-
-### Git
-
-Comprehensive Git operations via MCP. Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, worktrees, and more.
+Fetch and extract content from URLs as markdown, text, or raw HTML.
 
 | | |
 |---|---|
-| MCP Server | `git` |
-| Package | [`@cyanheads/git-mcp-server`](https://www.npmjs.com/package/@cyanheads/git-mcp-server) |
-| Command | `npx -y @cyanheads/git-mcp-server` |
-| Prerequisites | Git installed, Node.js 18+ |
+| Package | [`fetch-mcp`](https://www.npmjs.com/package/fetch-mcp) |
+| URL | `http://localhost:3000/fetch/mcp` |
 | Env vars | None |
-
-Steering files:
-- `advanced-workflows` — Rebasing, cherry-picking, stashing, worktrees, interactive history
-- `collaboration` — Remote management, pushing, pulling, fetching, team collaboration patterns
-
----
 
 ### GitHub
 
-Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, code search, and Copilot agent integration.
+Full GitHub platform operations. Includes a custom `github-extras` server for labels, milestones, releases, workflows, gists, collaborators, tags, and projects.
 
 | | |
 |---|---|
-| MCP Server | `github` |
-| Package | [`@modelcontextprotocol/server-github`](https://www.npmjs.com/package/@modelcontextprotocol/server-github) |
-| Command | `npx -y @modelcontextprotocol/server-github` |
-| Prerequisites | GitHub account, Personal Access Token, Node.js 18+ |
+| Packages | [`@modelcontextprotocol/server-github`](https://www.npmjs.com/package/@modelcontextprotocol/server-github) + custom `github-extras` |
+| URLs | `http://localhost:3000/github/mcp`, `http://localhost:3000/github-extras/mcp` |
 | Env vars | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 
-**Setup:** After installing, replace `YOUR_GITHUB_TOKEN_HERE` in `mcp.json` with your [GitHub PAT](https://github.com/settings/tokens). Required scopes: `repo`, `read:org`, `read:user`.
-
-Steering files:
-- `pull-requests` — Creating, reviewing, merging PRs, code review workflows
-- `issues-and-projects` — Issue management, labels, sub-issues, search patterns
-- `advanced-operations` — Releases, tags, Copilot agent delegation, secret scanning, repo management
-
----
-
-### npm
-
-npm package management via MCP. Search, install, update, audit, analyze dependencies, check bundle sizes, and manage licenses.
-
-| | |
-|---|---|
-| MCP Server | `npm` |
-| Package | [`@anthropic/npm-mcp-server`](https://www.npmjs.com/package/@anthropic/npm-mcp-server) |
-| Command | `npx -y @anthropic/npm-mcp-server` |
-| Prerequisites | Node.js (npm comes bundled) |
-| Env vars | None |
-
-Steering files:
-- `advanced-workflows` — Workspaces, publishing, linking, caching, CI/CD patterns
-
----
-
-### Chart Generator
-
-Generate charts using Chart.js v4 via MCP. Create bar, line, pie, doughnut, radar, scatter, and bubble charts as PNG images, interactive HTML, or raw JSON config.
-
-| | |
-|---|---|
-| MCP Server | `chart` |
-| Package | [`@ax-crew/chartjs-mcp-server`](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server) |
-| Command | `npx -y @ax-crew/chartjs-mcp-server@latest` |
-| Prerequisites | Node.js 18+ |
-| Env vars | None |
-
----
-
-### Filesystem
-
-Local filesystem operations via MCP. Read, write, move, search, and manage files and directories with sandboxed access to allowed directories only.
-
-| | |
-|---|---|
-| MCP Server | `filesystem` |
-| Package | [`@modelcontextprotocol/server-filesystem`](https://www.npmjs.com/package/@modelcontextprotocol/server-filesystem) |
-| Command | `npx -y @modelcontextprotocol/server-filesystem@latest <allowed-dirs>` |
-| Prerequisites | Node.js 18+ |
-| Env vars | None |
-
-**Setup:** Add one or more allowed directory paths as arguments in `mcp.json`. The server only accesses directories you explicitly permit.
-
-Steering files:
-- `advanced-operations` — Batch file operations, directory trees, search patterns, file management workflows
-
----
+Steering: `pull-requests`, `issues-and-projects`, `advanced-operations`
 
 ### Notion
 
-Full Notion workspace operations via MCP. Manage pages, databases, blocks, comments, users, and search across your Notion workspace.
+Full Notion workspace operations — pages, databases, blocks, comments, users, and search.
 
 | | |
 |---|---|
-| MCP Server | `notionApi` |
 | Package | [`@notionhq/notion-mcp-server`](https://www.npmjs.com/package/@notionhq/notion-mcp-server) |
-| Command | `npx -y @notionhq/notion-mcp-server` |
-| Prerequisites | Notion account, Internal Integration, Node.js 18+ |
-| Env vars | `OPENAPI_MCP_HEADERS` (contains Authorization header with API key) |
+| URL | `http://localhost:3000/notion/mcp` |
+| Env vars | `NOTION_API_KEY` |
 
-**Setup:** Create an [internal integration](https://www.notion.so/profile/integrations), copy the secret, and replace `YOUR_NOTION_API_KEY_HERE` in `mcp.json`. Share pages/databases with your integration via the "Connections" menu.
-
-Steering files:
-- `databases-and-pages` — Creating, querying, and managing databases and pages with property schemas
-- `blocks-and-content` — Working with block content, comments, and advanced content manipulation
-
----
-
-### MarkItDown
-
-Convert Word documents, PDFs, PowerPoint, Excel, images, audio, HTML, and 20+ other file formats to Markdown. Powered by Microsoft's MarkItDown library.
-
-| | |
-|---|---|
-| MCP Server | `markitdown` |
-| Package | Custom server wrapping [`markitdown`](https://github.com/microsoft/markitdown) |
-| Command | `uvx --with markitdown[all] --with mcp[cli] mcp run server.py` |
-| Prerequisites | Python 3.10+, [uv](https://docs.astral.sh/uv/getting-started/installation/) |
-| Env vars | None |
-
-Writes converted Markdown directly to disk and returns only a confirmation with file path and preview — avoids flooding AI context with large documents.
-
-Steering files:
-- `convert-and-save` — Default convert-and-write-to-file workflow, batch conversion, output path conventions
-
----
-
-### PDF Reader
-
-Read and extract content from PDF files via MCP. Supports local files and URLs with options for full text, specific pages, metadata, images, and table extraction.
-
-| | |
-|---|---|
-| MCP Server | `pdf-reader` |
-| Package | [`@sylphx/pdf-reader-mcp`](https://www.npmjs.com/package/@sylphx/pdf-reader-mcp) |
-| Command | `npx @sylphx/pdf-reader-mcp@latest` |
-| Prerequisites | Node.js 18+ |
-| Env vars | None |
-
----
+Steering: `databases-and-pages`, `blocks-and-content`
 
 ### YouTube
 
-YouTube platform operations via MCP. Search videos, get video details, read transcripts, explore channels, and browse playlists.
+Search videos, get details, read transcripts, explore channels, and browse playlists.
 
 | | |
 |---|---|
-| MCP Server | `youtube` |
 | Package | [`@sfiorini/youtube-mcp`](https://www.npmjs.com/package/@sfiorini/youtube-mcp) |
-| Command | `npx -y @sfiorini/youtube-mcp@latest` |
-| Prerequisites | Google account, YouTube Data API v3 key, Node.js 18+ |
+| URL | `http://localhost:3000/youtube/mcp` |
 | Env vars | `YOUTUBE_API_KEY` |
 
-**Setup:** Enable [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) in Google Cloud Console, create an API key, and replace `YOUR_YOUTUBE_API_KEY_HERE` in `mcp.json`.
+---
 
-Steering files:
-- `research-and-analysis` — Video research workflows, transcript analysis, channel exploration, content comparison
+## Staging Powers
+
+These powers run in Docker but need file access. A shared staging directory on the host is mounted into each container at `/staging`. The AI discovers the host path by reading `STAGING_DIR` from the `.env` file at runtime.
+
+Each service gets its own subfolder: `STAGING_DIR/chart`, `STAGING_DIR/markitdown`, `STAGING_DIR/pdf-reader`.
+
+### Chart Generator
+
+Generate bar, line, pie, doughnut, radar, scatter, and bubble charts as PNG, HTML, or JSON.
+
+| | |
+|---|---|
+| Package | [`@ax-crew/chartjs-mcp-server`](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server) |
+| URL | `http://localhost:3000/chart/mcp` |
+| Staging | `STAGING_DIR/chart` → `/staging` |
+
+### MarkItDown
+
+Convert Word, PDF, PowerPoint, Excel, images, audio, HTML, and 20+ formats to Markdown.
+
+| | |
+|---|---|
+| Source | [microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| URL | `http://localhost:3000/markitdown/mcp` |
+| Staging | `STAGING_DIR/markitdown` → `/staging` |
+
+Steering: `staging`, `convert-and-save`
+
+### PDF Reader
+
+Extract text, metadata, tables, and images from PDFs. Supports local files and URLs.
+
+| | |
+|---|---|
+| Package | [`@sylphx/pdf-reader-mcp`](https://www.npmjs.com/package/@sylphx/pdf-reader-mcp) |
+| URL | `http://localhost:3000/pdf-reader/mcp` |
+| Staging | `STAGING_DIR/pdf-reader` → `/staging` |
+
+Steering: `staging`
+
+---
+
+## CDP Power
+
+### Chrome DevTools
+
+Control Chrome from your AI assistant. Navigate, click, fill forms, screenshot, inspect network, run Lighthouse audits.
+
+| | |
+|---|---|
+| Package | [`chrome-devtools-mcp`](https://www.npmjs.com/package/chrome-devtools-mcp) |
+| URL | `http://localhost:3000/chrome-devtools/mcp` |
+| Host setup | Launch Chrome with `--remote-debugging-port=9222` |
+
+Steering: `testing-and-debugging`, `performance-and-audits`
+
+---
+
+## Host-Only Powers (Disabled)
+
+These powers need direct host access and are disabled by default. Enable them in `mcp.json` to run via stdio. Docker configs exist commented out in `docker-compose.yml`.
+
+### Docx Reader
+
+Read, write, search, merge, and convert Word documents (.docx).
+
+| | |
+|---|---|
+| Server | Custom Node.js server (mammoth + docx) |
+| Command | `node mcp/docx-reader/server.js` |
+
+### Filesystem
+
+Sandboxed local file operations — read, write, move, search, manage files.
+
+| | |
+|---|---|
+| Package | [`@modelcontextprotocol/server-filesystem`](https://www.npmjs.com/package/@modelcontextprotocol/server-filesystem) |
+| Command | `npx -y @modelcontextprotocol/server-filesystem@latest <allowed-dirs>` |
+
+Steering: `advanced-operations`
+
+### Git
+
+Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, and more.
+
+| | |
+|---|---|
+| Package | [`@cyanheads/git-mcp-server`](https://www.npmjs.com/package/@cyanheads/git-mcp-server) |
+| Command | `npx -y @cyanheads/git-mcp-server@latest` |
+
+Steering: `advanced-workflows`, `collaboration`
+
+### npm
+
+Search, install, update, audit, analyze dependencies, check bundle sizes, manage licenses.
+
+| | |
+|---|---|
+| Package | [`npmplus-mcp-server`](https://www.npmjs.com/package/npmplus-mcp-server) |
+| Command | `npx --yes npmplus-mcp-server@latest` |
+
+Steering: `advanced-workflows`
+
+### Playwright
+
+Browser automation — navigate, click, fill forms, screenshot, accessibility snapshots.
+
+| | |
+|---|---|
+| Package | [`@playwright/mcp`](https://www.npmjs.com/package/@playwright/mcp) |
+| Command | `npx -y @playwright/mcp@latest` |
+
+Steering: `browser-testing`
+
+### SQLite
+
+Query, inspect, and manage SQLite databases with full CRUD and schema introspection.
+
+| | |
+|---|---|
+| Package | [`mcp-sqlite`](https://www.npmjs.com/package/mcp-sqlite) |
+| Command | `npx -y mcp-sqlite <database-path>` |
+
+Steering: `query-workflows`
+
+---
+
+## Configuration
+
+### .env
+
+Copy `.env.example` to `.env` and configure:
+
+```env
+# Staging directory — absolute path, no variable expansion
+STAGING_DIR=C:/Users/YourName/mcp-staging
+
+# API keys
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...
+NOTION_API_KEY=ntn_...
+YOUTUBE_API_KEY=AIza...
+CONTEXT7_API_KEY=ctx7sk-...
+```
+
+### Docker
+
+```bash
+docker compose build    # Build all images
+docker compose up -d    # Start all services
+docker compose logs -f  # Watch logs
+docker compose down     # Stop everything
+```
+
+### Dockerfiles
+
+| File | Used by | Description |
+|------|---------|-------------|
+| `docker/node.Dockerfile` | Most services | Generic Node.js + supergateway + one MCP package (via `MCP_PACKAGE` build arg) |
+| `docker/local-server.Dockerfile` | docx-reader, github-extras | Copies and installs a local Node.js MCP server |
+| `docker/markitdown.Dockerfile` | markitdown | Python + Node.js hybrid for MarkItDown |
+| `docker/youtube.Dockerfile` | youtube | Pins `youtube-transcript` to a compatible version |
+| `docker/playwright.Dockerfile` | playwright | Node.js + Chromium only (~800MB) |
+| `docker/playwright-local.Dockerfile` | playwright (CDP) | No browser — connects to host Chrome via CDP (~200MB) |
+| `docker/playwright-all.Dockerfile` | — | Full Playwright image with all browsers (~2GB) |
+
+### Power Structure
+
+Each power folder contains:
+
+```
+powers/<name>/
+├── mcp.json          # MCP server config (SSE URL + disabled stdio fallback)
+├── POWER.md          # Documentation, tools, workflows, troubleshooting
+└── steering/         # Auto-included workflow guides for the AI
+```
 
 ## Installation
 
-Copy any power folder into your Kiro workspace's `.kiro/powers/` directory (or install via the Kiro Powers panel). Each power contains:
-
-- `mcp.json` — MCP server configuration
-- `POWER.md` — Full documentation and usage examples
-- `steering/` — Optional workflow guides that provide additional context to the AI assistant
+Copy any power folder into your Kiro workspace's `.kiro/powers/` directory or install via the Kiro Powers panel.
 
 ## License
 

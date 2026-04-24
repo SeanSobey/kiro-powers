@@ -1,8 +1,9 @@
 ---
 name: "chrome-devtools-mcp"
+version: "1.0.2"
 displayName: "Chrome DevTools MCP"
 description: "Control Chrome from your AI assistant. Navigate pages, click elements, fill forms, take screenshots, inspect network requests, run Lighthouse audits, and trace performance."
-keywords: ["chrome", "browser", "devtools", "screenshot", "lighthouse"]
+keywords: ["@chrome-devtools"]
 author: "Sean Sobey"
 ---
 
@@ -308,6 +309,8 @@ get_network_request with reqid=12, responseFilePath="response.json"
 ## Configuration
 
 No additional configuration required — works after the MCP server is installed.
+
+The default config connects to Docker via Streamable HTTP. The container connects to Chrome on your host via CDP — launch Chrome with `--remote-debugging-port=9222`. Run `docker compose up -d` from the repo root. A disabled `chrome-devtools-nodejs` entry in `mcp.json` is available for local stdio fallback.
 
 ---
 

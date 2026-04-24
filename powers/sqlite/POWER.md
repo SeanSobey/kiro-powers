@@ -1,8 +1,9 @@
 ---
 name: "sqlite"
+version: "1.0.0"
 displayName: "SQLite"
 description: "SQLite database operations via MCP. Query, inspect, and manage SQLite databases with full CRUD support, schema introspection, and custom SQL execution from your AI assistant."
-keywords: ["sqlite", "database", "sql", "db", "query", "tables"]
+keywords: ["@sqlite"]
 author: "Kiro Community"
 ---
 
@@ -39,6 +40,8 @@ The server requires a path to your SQLite database file as an argument.
 ```
 
 The database file must exist. The server connects to it on startup and keeps the connection open for the session.
+
+This power is disabled by default. Enable it in `mcp.json` and set your database path. A Docker config exists commented out in `docker-compose.yml`.
 
 ## Common Workflows
 

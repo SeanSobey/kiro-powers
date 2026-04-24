@@ -1,8 +1,9 @@
 ---
 name: "git"
+version: "1.0.0"
 displayName: "Git"
 description: "Comprehensive Git operations via MCP. Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, and more — all from your AI assistant."
-keywords: ["git", "version-control", "repository", "commits", "branches"]
+keywords: ["@git"]
 author: "Sean Sobey"
 ---
 
@@ -23,7 +24,7 @@ This power covers the complete Git lifecycle: repository setup, daily developmen
 
 ### Prerequisites
 - Git installed on your system (`git --version` to verify)
-- Node.js 18+ (for npx to run the MCP server)
+- Node.js 18+ (for npx)
 
 ### Configuration
 
@@ -299,7 +300,7 @@ git_wrapup_instructions with acknowledgement="Y"
 
 ## Configuration
 
-No additional configuration required — works with any local Git repository after the MCP server is installed.
+This power is disabled by default. Enable it in `mcp.json` to run on the host via stdio. A Docker config exists commented out in `docker-compose.yml`.
 
 ---
 

@@ -1,8 +1,9 @@
 ---
 name: "pdf-reader"
+version: "1.0.1"
 displayName: "PDF Reader"
 description: "Read and extract content from PDF files via MCP. Supports local files and URLs with options for full text, specific pages, metadata, images, and table extraction."
-keywords: ["pdf", "pdf-reader", "document", "extract", "tables"]
+keywords: ["@pdf-reader"]
 author: "Kiro Community"
 ---
 
@@ -17,10 +18,13 @@ This power is useful for analyzing documents, extracting data from reports, read
 ## Onboarding
 
 ### Prerequisites
-- Node.js 18+ (for npx)
+- Docker (default) or Node.js 18+ (local fallback)
 
 ### Configuration
-No API keys or credentials required. Works out of the box after installation.
+Default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. Files in the staging directory are accessible at `/staging` inside the container. A disabled `pdf-reader-nodejs` entry in `mcp.json` is available for local stdio fallback.
+
+### Staging Workflow
+This power runs in Docker and can only access files inside the `/staging` volume. See the **staging** steering file for the full workflow — the AI reads `STAGING_DIR` from `${powerDir}/../../.env` at runtime to discover the host path, copies files there, and references them as `/staging/<filename>` in tool calls.
 
 ## Common Workflows
 

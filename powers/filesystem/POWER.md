@@ -1,8 +1,9 @@
 ---
 name: "filesystem"
+version: "1.0.0"
 displayName: "Filesystem"
 description: "Local filesystem operations via MCP. Read, write, move, search, and manage files and directories with sandboxed access to allowed directories only."
-keywords: ["filesystem", "files", "directories", "file-management", "local-files"]
+keywords: ["@filesystem"]
 author: "Kiro Community"
 ---
 
@@ -56,6 +57,8 @@ The server requires you to specify which directories it can access. Add one or m
 ```
 
 Subdirectories within allowed directories are also accessible. The server will refuse any operations outside these paths.
+
+This power is disabled by default. Enable it in `mcp.json` and configure the allowed directories. A Docker config exists commented out in `docker-compose.yml`.
 
 ## Common Workflows
 

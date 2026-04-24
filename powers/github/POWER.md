@@ -1,8 +1,9 @@
 ---
 name: "github"
+version: "1.0.1"
 displayName: "GitHub"
 description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, projects, and lightweight issue summaries from your AI assistant."
-keywords: ["github", "pull-request", "issues", "repository", "code-review", "releases", "labels", "milestones", "actions", "workflows", "gists", "collaborators", "tags", "projects"]
+keywords: ["@github"]
 author: "Sean Sobey"
 ---
 
@@ -25,7 +26,7 @@ This power combines the `@modelcontextprotocol/server-github` package with a cus
 ### Prerequisites
 - A GitHub account
 - A Personal Access Token (PAT) with appropriate scopes
-- Node.js 18+ (for npx)
+- Docker (default) or Node.js 18+ (local fallback)
 
 ### Getting Your GitHub Token
 
@@ -43,6 +44,8 @@ This power combines the `@modelcontextprotocol/server-github` package with a cus
 ### Configuration
 
 After installing this power, replace the placeholder in `mcp.json` with your actual token.
+
+The default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. Set your token in `.env`. Disabled `-nodejs` entries in `mcp.json` are available for local stdio fallback.
 
 ## Common Workflows
 
