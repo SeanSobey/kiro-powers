@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "markitdown-python": {
+      "disabled": true,
+      "command": "uv",
+      "args": ["run", "server.py"],
+      "cwd": "${powerDir}",
+      "autoApprove": ["convert_to_markdown"]
+    },
+    "markitdown": {
+      "url": "http://localhost:3000/markitdown/mcp",
+      "autoApprove": ["convert_to_markdown"]
+    }
+  }
+}
+
