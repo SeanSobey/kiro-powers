@@ -1,7 +1,7 @@
 ---
 name: "filesystem"
 version: "1.0.0"
-displayName: "Filesystem"
+displayName: "📁 Filesystem"
 description: "Local filesystem operations via MCP. Read, write, move, search, and manage files and directories with sandboxed access to allowed directories only."
 keywords: ["@filesystem"]
 author: "Kiro Community"

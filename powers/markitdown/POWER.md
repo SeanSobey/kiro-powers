@@ -1,7 +1,7 @@
 ---
 name: "markitdown"
 version: "1.0.1"
-displayName: "MarkItDown"
+displayName: "✏️ MarkItDown"
 description: "Convert Word documents, PDFs, PowerPoint, Excel, images, audio, HTML, and 20+ other file formats to Markdown via MCP. Powered by Microsoft's MarkItDown."
 keywords: ["@markitdown"]
 author: "Kiro Community"

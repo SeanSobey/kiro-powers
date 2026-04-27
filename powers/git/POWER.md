@@ -1,7 +1,7 @@
 ---
 name: "git"
 version: "1.0.0"
-displayName: "Git"
+displayName: "🔀 Git"
 description: "Comprehensive Git operations via MCP. Clone, commit, push, pull, branch, diff, log, stash, rebase, cherry-pick, and more — all from your AI assistant."
 keywords: ["@git"]
 author: "Sean Sobey"

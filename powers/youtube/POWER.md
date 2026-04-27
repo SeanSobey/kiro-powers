@@ -1,7 +1,7 @@
 ---
 name: "youtube"
 version: "1.0.1"
-displayName: "YouTube"
+displayName: "▶️ YouTube"
 description: "YouTube platform operations via MCP. Search videos, get video details, read transcripts, explore channels, and browse playlists from your AI assistant."
 keywords: ["@youtube"]
 author: "Kiro Community"

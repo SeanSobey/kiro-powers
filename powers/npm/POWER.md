@@ -1,7 +1,7 @@
 ---
 name: "npm"
 version: "1.0.0"
-displayName: "npm"
+displayName: "📦 npm"
 description: "npm package management via MCP. Search, install, update, audit, analyze dependencies, check bundle sizes, and manage licenses — all from your AI assistant."
 keywords: ["@npm"]
 author: "Sean Sobey"

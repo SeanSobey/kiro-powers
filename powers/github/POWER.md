@@ -1,7 +1,7 @@
 ---
 name: "github"
 version: "1.0.1"
-displayName: "GitHub"
+displayName: "🐙 GitHub"
 description: "Full GitHub platform operations via MCP. Manage repositories, issues, pull requests, branches, releases, labels, milestones, workflows, gists, collaborators, tags, projects, and lightweight issue summaries from your AI assistant."
 keywords: ["@github"]
 author: "Sean Sobey"

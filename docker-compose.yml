@@ -42,6 +42,7 @@ services:
       - github-extras
       - markitdown
       - notion
+      - pandoc
       - pdf-reader
       - youtube
     restart: unless-stopped
@@ -137,6 +138,18 @@ services:
     entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chartjs-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
     volumes:
       - ${STAGING_DIR}/chart:/staging
+
+  # ── pandoc (Python + Node) ────────────────────────────────────────────
+  pandoc:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/pandoc.Dockerfile
+    expose:
+      - "8000"
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000"]
+    volumes:
+      - ${STAGING_DIR}/pandoc:/staging
 
   # ── markitdown (Python + Node) ──────────────────────────────────────────
   markitdown:

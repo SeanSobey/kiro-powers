@@ -1,7 +1,7 @@
 ---
 name: "notion"
 version: "1.0.1"
-displayName: "Notion"
+displayName: "📓 Notion"
 description: "Full Notion workspace operations via MCP. Manage pages, databases, blocks, comments, users, and search across your Notion workspace from your AI assistant."
 keywords: ["@notion"]
 author: "Kiro Community"

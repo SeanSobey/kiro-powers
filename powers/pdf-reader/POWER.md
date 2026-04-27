@@ -1,7 +1,7 @@
 ---
 name: "pdf-reader"
 version: "1.0.1"
-displayName: "PDF Reader"
+displayName: "📄 PDF Reader"
 description: "Read and extract content from PDF files via MCP. Supports local files and URLs with options for full text, specific pages, metadata, images, and table extraction."
 keywords: ["@pdf-reader"]
 author: "Kiro Community"

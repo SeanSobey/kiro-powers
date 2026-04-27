@@ -1,7 +1,7 @@
 ---
 name: "chrome-devtools-mcp"
 version: "1.0.2"
-displayName: "Chrome DevTools MCP"
+displayName: "🔧 Chrome DevTools MCP"
 description: "Control Chrome from your AI assistant. Navigate pages, click elements, fill forms, take screenshots, inspect network requests, run Lighthouse audits, and trace performance."
 keywords: ["@chrome-devtools"]
 author: "Sean Sobey"

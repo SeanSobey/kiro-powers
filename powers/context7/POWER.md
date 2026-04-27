@@ -1,7 +1,7 @@
 ---
 name: "context7"
 version: "1.0.1"
-displayName: "Context7"
+displayName: "📚 Context7"
 description: "Up-to-date library documentation and code examples via Context7 MCP. Resolve library IDs and query current docs for any npm package, framework, or language library."
 keywords: ["@context7"]
 author: "Sean Sobey"

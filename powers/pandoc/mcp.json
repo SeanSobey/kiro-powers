@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "pandoc-python": {
+      "disabled": true,
+      "command": "uv",
+      "args": ["run", "server.py"],
+      "cwd": "${powerDir}",
+      "autoApprove": ["convert_document"]
+    },
+    "pandoc": {
+      "url": "http://localhost:3000/pandoc/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MCP_PROXY_TOKEN}"
+      },
+      "autoApprove": ["convert_document"]
+    }
+  }
+}

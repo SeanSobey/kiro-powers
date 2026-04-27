@@ -1,7 +1,7 @@
 ---
 name: "chart"
 version: "1.0.1"
-displayName: "Chart Generator"
+displayName: "📊 Chart Generator"
 description: "Generate charts using Chart.js via MCP. Create bar, line, pie, doughnut, radar, scatter, and bubble charts as PNG images, interactive HTML, or raw JSON config."
 keywords: ["@chart"]
 author: "Kiro Community"
