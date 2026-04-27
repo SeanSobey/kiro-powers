@@ -13,4 +13,7 @@ RUN npm install
 COPY ${SERVER_DIR}/ /app/
 
 WORKDIR /srv
+
+RUN addgroup --system mcp && adduser --system --ingroup mcp mcp
+USER mcp
 EXPOSE 8000

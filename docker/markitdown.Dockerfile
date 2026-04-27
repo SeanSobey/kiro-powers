@@ -15,4 +15,6 @@ RUN uv run /srv/server.py --help 2>/dev/null || true
 RUN npm init -y > /dev/null 2>&1 && \
     npm install --save supergateway
 
+RUN addgroup --system mcp && adduser --system --ingroup mcp mcp
+USER mcp
 EXPOSE 8000

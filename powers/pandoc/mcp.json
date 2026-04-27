@@ -9,9 +9,6 @@
     },
     "pandoc": {
       "url": "http://localhost:3000/pandoc/mcp",
-      "headers": {
-        "Authorization": "Bearer ${MCP_PROXY_TOKEN}"
-      },
       "autoApprove": ["convert_document"]
     }
   }

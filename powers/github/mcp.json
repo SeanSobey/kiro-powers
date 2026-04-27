@@ -14,14 +14,31 @@
       "args": ["${powerDir}/../../mcp/github-extras/server.js"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
-      }
+      },
+      "disabledTools": [
+        "delete_release",
+        "delete_project",
+        "delete_label",
+        "delete_milestone",
+        "delete_tag",
+        "remove_collaborator",
+        "trigger_workflow"
+      ]
     },
     "github": {
       "url": "http://localhost:3000/github/mcp"
     },
     "github-extras": {
-      "url": "http://localhost:3000/github-extras/mcp"
+      "url": "http://localhost:3000/github-extras/mcp",
+      "disabledTools": [
+        "delete_release",
+        "delete_project",
+        "delete_label",
+        "delete_milestone",
+        "delete_tag",
+        "remove_collaborator",
+        "trigger_workflow"
+      ]
     }
   }
 }
-
