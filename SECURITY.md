@@ -73,28 +73,7 @@ The GitHub PAT is passed to both `github` and `github-extras` containers. The `g
 
 ## Medium
 
-### 5. No Path Validation in `docx-reader`
-
-**Risk:** Path Traversal, Arbitrary File Read/Write
-
-The `read_file`, `write_file`, `read_docx`, and other tools in `mcp/docx-reader/server.js` accept arbitrary absolute paths with no sandboxing. `resolve(filePath)` does not restrict traversal. A prompt injection could read `~/.ssh/id_rsa`, `.env`, or write to system files.
-
-**MCP spec reference:** [Local MCP Server Compromise](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices#local-mcp-server-compromise) — "Restrict file system access outside expected directories"
-
-**Mitigation:**
-```javascript
-const ALLOWED_ROOTS = ['/staging', '/workspace'];
-
-function safePath(filePath) {
-  const abs = resolve(filePath);
-  if (!ALLOWED_ROOTS.some(root => abs.startsWith(root + '/'))) {
-    throw new Error(`Access denied: ${abs} is outside allowed directories`);
-  }
-  return abs;
-}
-```
-
-### 6. Overly Broad `autoApprove` Lists
+### 5. Overly Broad `autoApprove` Lists
 
 **Risk:** Prompt Injection, Unintended Tool Execution
 
@@ -102,7 +81,6 @@ Several powers auto-approve tools, bypassing Kiro's consent mechanism — the pr
 
 | Power | Auto-approved tools |
 |-------|-------------------|
-| `docx-reader` | 9 tools including `read_file` (reads any file type) |
 | `fetch` | `fetch_url` (can be used for SSRF or data exfiltration) |
 | `markitdown` | `convert_to_markdown` |
 | `pandoc` | `convert_document` |
@@ -115,27 +93,7 @@ Several powers auto-approve tools, bypassing Kiro's consent mechanism — the pr
 - Keep `autoApprove` only for truly safe, read-only, sandboxed operations
 - Use Kiro hooks (`preToolUse`) to add approval gates for destructive operations
 
-### 7. Regex Injection in `search_docx`
-
-**Risk:** ReDoS (Regular Expression Denial of Service)
-
-`mcp/docx-reader/server.js` passes user input directly to `new RegExp(query, "gi")`. A crafted pattern like `(a+)+$` against a long string causes catastrophic backtracking, hanging the server.
-
-**Mitigation:**
-```javascript
-function safeRegex(pattern) {
-  try {
-    const re = new RegExp(pattern, 'gi');
-    // Test for catastrophic backtracking with a timeout or use a safe regex library
-    return re;
-  } catch {
-    throw new Error(`Invalid regex pattern: ${pattern}`);
-  }
-}
-```
-Or use a library like `re2` that guarantees linear-time matching.
-
-### 8. No Rate Limiting or Request Size Limits
+### 6. No Rate Limiting or Request Size Limits
 
 **Risk:** Resource Exhaustion, API Abuse
 
@@ -156,7 +114,7 @@ http {
 }
 ```
 
-### 9. API Keys Visible in Container Metadata
+### 7. API Keys Visible in Container Metadata
 
 **Risk:** Credential Exposure
 
@@ -170,13 +128,13 @@ API keys passed as environment variables are visible via `docker inspect`, `/pro
 
 ## Low / Informational
 
-### 10. No TLS on Localhost
+### 8. No TLS on Localhost
 
 Traffic between Kiro and nginx is plain HTTP. Low risk when bound to localhost, but any local process can sniff the traffic including API keys in headers.
 
 **Mitigation:** Use a self-signed cert or mTLS if the threat model includes local network sniffing.
 
-### 11. No Health Checks
+### 9. No Health Checks
 
 `restart: unless-stopped` without health checks means a crashed MCP server silently restarts and may serve errors or stale state without visibility.
 
@@ -189,7 +147,7 @@ healthcheck:
   retries: 3
 ```
 
-### 12. SSRF via URL-Accepting Tools
+### 10. SSRF via URL-Accepting Tools
 
 `markitdown` (`convert_to_markdown`) and `pandoc` (`convert_document`) accept `http:`/`https:` URIs. If the container has network access to internal services, these tools could be used for SSRF.
 
@@ -200,7 +158,7 @@ healthcheck:
 - Validate URLs against private IP ranges before fetching
 - Use an egress proxy
 
-### 13. Secrets in `.env` File
+### 11. Secrets in `.env` File
 
 The `.env` file contains live API keys (GitHub PAT, Notion, YouTube, Context7). While `.gitignore` excludes it from version control, it's readable by any process with workspace access — including every MCP tool that can read files.
 
@@ -219,9 +177,7 @@ The `.env` file contains live API keys (GitHub PAT, Notion, YouTube, Context7). 
 | 2 | Containers run as root | 🔴 Critical | Privilege Escalation | ✅ Fixed |
 | 3 | Unpinned `@latest` packages | 🔴 Critical | Supply Chain / Tool Poisoning | |
 | 4 | Overbroad GitHub PAT | 🔴 Critical | Scope Minimization | ✅ Fixed |
-| 5 | No path validation in docx-reader | 🟡 Medium | Path Traversal | |
 | 6 | Overly broad autoApprove | 🟡 Medium | Prompt Injection | |
-| 7 | Regex injection in search_docx | 🟡 Medium | ReDoS | ✅ Fixed |
 | 8 | No rate limiting | 🟡 Medium | Resource Exhaustion | |
 | 9 | API keys in container metadata | 🟡 Medium | Credential Exposure | |
 | 10 | No TLS on localhost | 🟢 Low | Eavesdropping | |

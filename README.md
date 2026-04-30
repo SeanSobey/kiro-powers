@@ -19,7 +19,7 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | API-only | context7, fetch, github, github-extras, notion, youtube | Pure network services, no host access needed |
 | Staging | chart, markitdown, pandoc, pdf-reader | Read/write files via a shared staging volume |
 | CDP | chrome-devtools | Connects to Chrome on the host via DevTools Protocol |
-| Host-only | docx-reader, filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
+| Host-only | filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
 
 ## Quick Start
 
@@ -35,7 +35,6 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | [Chart Generator](#chart-generator) | Docker (staging) | Generate charts using Chart.js v4 |
 | [Chrome DevTools](#chrome-devtools) | Docker (CDP) | Control Chrome — navigate, click, screenshot, Lighthouse |
 | [Context7](#context7) | Docker | Live documentation and code examples for any library |
-| [Docx Reader](#docx-reader) | Host (disabled) | Read, write, search, merge, and convert Word documents |
 | [Fetch](#fetch) | Docker | Fetch and extract content from URLs |
 | [Filesystem](#filesystem) | Host (disabled) | Sandboxed local file operations |
 | [Git](#git) | Host (disabled) | Comprehensive Git operations |
@@ -185,15 +184,6 @@ Steering: `testing-and-debugging`, `performance-and-audits`
 
 These powers need direct host access and are disabled by default. Enable them in `mcp.json` to run via stdio. Docker configs exist commented out in `docker-compose.yml`.
 
-### Docx Reader
-
-Read, write, search, merge, and convert Word documents (.docx).
-
-| | |
-|---|---|
-| Server | Custom Node.js server (mammoth + docx) |
-| Command | `node mcp/docx-reader/server.js` |
-
 ### Filesystem
 
 Sandboxed local file operations — read, write, move, search, manage files.
@@ -282,7 +272,7 @@ docker compose down     # Stop everything
 | File | Used by | Description |
 |------|---------|-------------|
 | `docker/node.Dockerfile` | Most services | Generic Node.js + supergateway + one MCP package (via `MCP_PACKAGE` build arg) |
-| `docker/local-server.Dockerfile` | docx-reader, github-extras | Copies and installs a local Node.js MCP server |
+| `docker/local-server.Dockerfile` | github-extras | Copies and installs a local Node.js MCP server |
 | `docker/markitdown.Dockerfile` | markitdown | Python + Node.js hybrid for MarkItDown |
 | `docker/pandoc.Dockerfile` | pandoc | Python + Node.js + LaTeX for Pandoc |
 | `docker/youtube.Dockerfile` | youtube | Pins `youtube-transcript` to a compatible version |
