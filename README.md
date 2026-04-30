@@ -10,12 +10,14 @@ Powers run as MCP servers inside Docker containers, exposed over Streamable HTTP
 Kiro IDE → http://localhost:3000/<power>/mcp → nginx → supergateway → MCP server
 ```
 
+All containers run as a non-root `mcp` user. The nginx proxy validates the `Host` header to block DNS rebinding attacks.
+
 ### Tiers
 
 | Tier | Powers | Description |
 |------|--------|-------------|
 | API-only | context7, fetch, github, github-extras, notion, youtube | Pure network services, no host access needed |
-| Staging | chart, markitdown, pdf-reader | Read/write files via a shared staging volume |
+| Staging | chart, markitdown, pandoc, pdf-reader | Read/write files via a shared staging volume |
 | CDP | chrome-devtools | Connects to Chrome on the host via DevTools Protocol |
 | Host-only | docx-reader, filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
 
@@ -41,6 +43,7 @@ Kiro IDE → http://localhost:3000/<power>/mcp → nginx → supergateway → MC
 | [MarkItDown](#markitdown) | Docker (staging) | Convert 20+ file formats to Markdown |
 | [Notion](#notion) | Docker | Notion workspace — pages, databases, blocks, search |
 | [npm](#npm) | Host (disabled) | npm package management |
+| [Pandoc](#pandoc) | Docker (staging) | Convert documents between 10+ formats |
 | [PDF Reader](#pdf-reader) | Docker (staging) | Extract text, metadata, tables, images from PDFs |
 | [Playwright](#playwright) | Host (disabled) | Browser automation via Playwright |
 | [SQLite](#sqlite) | Host (disabled) | SQLite database operations |
@@ -73,6 +76,8 @@ Fetch and extract content from URLs as markdown, text, or raw HTML.
 ### GitHub
 
 Full GitHub platform operations. Includes a custom `github-extras` server for labels, milestones, releases, workflows, gists, collaborators, tags, and projects.
+
+Destructive tools (`delete_release`, `delete_project`, `delete_label`, `delete_milestone`, `delete_tag`, `remove_collaborator`, `trigger_workflow`) are disabled by default via `disabledTools` in `mcp.json`. Remove entries from the list to re-enable specific tools.
 
 | | |
 |---|---|
@@ -110,7 +115,7 @@ Search videos, get details, read transcripts, explore channels, and browse playl
 
 These powers run in Docker but need file access. A shared staging directory on the host is mounted into each container at `/staging`. The AI discovers the host path by reading `STAGING_DIR` from the `.env` file at runtime.
 
-Each service gets its own subfolder: `STAGING_DIR/chart`, `STAGING_DIR/markitdown`, `STAGING_DIR/pdf-reader`.
+Each service gets its own subfolder: `STAGING_DIR/chart`, `STAGING_DIR/markitdown`, `STAGING_DIR/pandoc`, `STAGING_DIR/pdf-reader`.
 
 ### Chart Generator
 
@@ -133,6 +138,18 @@ Convert Word, PDF, PowerPoint, Excel, images, audio, HTML, and 20+ formats to Ma
 | Staging | `STAGING_DIR/markitdown` → `/staging` |
 
 Steering: `staging`, `convert-and-save`
+
+### Pandoc
+
+Convert Markdown to PDF, DOCX, HTML, LaTeX, EPUB, and 10+ other document formats.
+
+| | |
+|---|---|
+| Source | Custom Python server wrapping [Pandoc](https://pandoc.org/) via `pypandoc_binary` |
+| URL | `http://localhost:3000/pandoc/mcp` |
+| Staging | `STAGING_DIR/pandoc` → `/staging` |
+
+Steering: `staging`
 
 ### PDF Reader
 
@@ -267,10 +284,11 @@ docker compose down     # Stop everything
 | `docker/node.Dockerfile` | Most services | Generic Node.js + supergateway + one MCP package (via `MCP_PACKAGE` build arg) |
 | `docker/local-server.Dockerfile` | docx-reader, github-extras | Copies and installs a local Node.js MCP server |
 | `docker/markitdown.Dockerfile` | markitdown | Python + Node.js hybrid for MarkItDown |
+| `docker/pandoc.Dockerfile` | pandoc | Python + Node.js + LaTeX for Pandoc |
 | `docker/youtube.Dockerfile` | youtube | Pins `youtube-transcript` to a compatible version |
 | `docker/playwright.Dockerfile` | playwright | Node.js + Chromium only (~800MB) |
 | `docker/playwright-local.Dockerfile` | playwright (CDP) | No browser — connects to host Chrome via CDP (~200MB) |
-| `docker/playwright-all.Dockerfile` | — | Full Playwright image with all browsers (~2GB) |
+| `docker/playwright-all-browsers.Dockerfile` | — | Full Playwright image with all browsers (~2GB) |
 
 ### Power Structure
 
@@ -278,10 +296,16 @@ Each power folder contains:
 
 ```
 powers/<name>/
-├── mcp.json          # MCP server config (SSE URL + disabled stdio fallback)
+├── mcp.json          # MCP server config (HTTP URL + disabled stdio fallback)
 ├── POWER.md          # Documentation, tools, workflows, troubleshooting
 └── steering/         # Auto-included workflow guides for the AI
 ```
+
+## Security
+
+All containers run as a non-root `mcp` user. The nginx proxy rejects requests with non-localhost `Host` headers to prevent DNS rebinding attacks. Destructive GitHub tools are disabled by default via `disabledTools`.
+
+See [SECURITY.md](SECURITY.md) for the full audit, threat model, and remaining recommendations.
 
 ## Installation
 
