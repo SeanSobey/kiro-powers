@@ -3,7 +3,7 @@
     "pdf-reader-nodejs": {
       "disabled": true,
       "command": "npx",
-      "args": ["-y", "@sylphx/pdf-reader-mcp@latest"],
+      "args": ["-y", "@sylphx/pdf-reader-mcp@2.3.1"],
       "autoApprove": ["read_pdf"]
     },
     "pdf-reader": {

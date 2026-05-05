@@ -3,7 +3,7 @@
     "fetch-nodejs": {
       "disabled": true,
       "command": "npx",
-      "args": ["-y", "fetch-mcp@latest"],
+      "args": ["-y", "fetch-mcp@0.0.5"],
       "autoApprove": ["fetch_url"]
     },
     "fetch": {

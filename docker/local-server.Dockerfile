@@ -3,13 +3,14 @@ WORKDIR /srv
 
 # Install supergateway globally
 RUN npm init -y > /dev/null 2>&1 && \
-    npm install --save supergateway
+    npm install --save --omit=dev supergateway && \
+    npm cache clean --force
 
 # Copy and install the local MCP server
 ARG SERVER_DIR
 COPY ${SERVER_DIR}/package.json ${SERVER_DIR}/package-lock.json* /app/
 WORKDIR /app
-RUN npm install
+RUN npm install --omit=dev && npm cache clean --force
 COPY ${SERVER_DIR}/ /app/
 
 WORKDIR /srv

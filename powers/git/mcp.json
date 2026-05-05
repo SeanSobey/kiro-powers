@@ -3,7 +3,7 @@
     "git": {
       "disabled": true,
       "command": "npx",
-      "args": ["-y", "@cyanheads/git-mcp-server@latest"]
+      "args": ["-y", "@cyanheads/git-mcp-server@2.15.0"]
     }
   }
 }

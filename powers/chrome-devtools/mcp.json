@@ -1,13 +1,13 @@
 {
   "mcpServers": {
     "chrome-devtools-nodejs": {
-      "disabled": true,
       "command": "npx",
       "args": ["-y",
-        "chrome-devtools-mcp@latest",
+        "chrome-devtools-mcp@0.23.0",
         "--no-usage-statistics"]
     },
     "chrome-devtools": {
+      "disabled": true,
       "url": "http://localhost:3000/chrome-devtools/mcp"
     }
   }

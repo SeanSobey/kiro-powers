@@ -3,7 +3,7 @@
     "youtube-nodejs": {
       "disabled": true,
       "command": "npx",
-      "args": ["-y", "@sfiorini/youtube-mcp@latest"],
+      "args": ["-y", "@sfiorini/youtube-mcp@0.1.9"],
       "env": {
         "YOUTUBE_API_KEY": "YOUR_YOUTUBE_API_KEY_HERE"
       }

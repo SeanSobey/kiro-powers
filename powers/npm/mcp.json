@@ -3,7 +3,7 @@
     "npm": {
       "disabled": true,
       "command": "npx",
-      "args": ["--yes", "npmplus-mcp-server@latest"]
+      "args": ["--yes", "npmplus-mcp-server@12.0.19"]
     }
   }
 }
