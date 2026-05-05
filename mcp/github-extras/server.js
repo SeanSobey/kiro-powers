@@ -707,6 +707,67 @@ server.tool(
   }
 );
 
+// ─── Workflow Job Logs ────────────────────────────────────────────────────────
+
+server.tool(
+  "list_workflow_run_jobs",
+  "List jobs for a specific workflow run",
+  {
+    owner: z.string().describe("Repository owner"),
+    repo: z.string().describe("Repository name"),
+    run_id: z.number().describe("Workflow run ID"),
+    filter: z.enum(["latest", "all"]).optional().describe("Filter jobs (default: latest)"),
+    per_page: z.number().optional().describe("Results per page (max 100)"),
+    page: z.number().optional().describe("Page number"),
+  },
+  async ({ owner, repo, run_id, filter, per_page, page }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const params = new URLSearchParams();
+    if (filter) params.set("filter", filter);
+    if (per_page) params.set("per_page", String(per_page));
+    if (page) params.set("page", String(page));
+    const qs = params.toString();
+    const res = await ghFetch(`/repos/${owner}/${repo}/actions/runs/${run_id}/jobs${qs ? `?${qs}` : ""}`);
+    const data = await res.json();
+    if (!res.ok) return apiError(res.status, data);
+    return ok(data.jobs.map((j) => ({
+      id: j.id,
+      name: j.name,
+      status: j.status,
+      conclusion: j.conclusion,
+      started_at: j.started_at,
+      completed_at: j.completed_at,
+      steps: j.steps?.map((s) => ({ name: s.name, status: s.status, conclusion: s.conclusion, number: s.number })),
+    })));
+  }
+);
+
+server.tool(
+  "get_workflow_job_logs",
+  "Get the plain-text logs for a specific workflow job",
+  {
+    owner: z.string().describe("Repository owner"),
+    repo: z.string().describe("Repository name"),
+    job_id: z.number().describe("Job ID (get from list_workflow_run_jobs)"),
+  },
+  async ({ owner, repo, job_id }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/jobs/${job_id}/logs`, {
+      headers: HEADERS,
+      redirect: "follow",
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return apiError(res.status, data);
+    }
+    const logs = await res.text();
+    // Truncate if excessively large to avoid overwhelming context
+    const maxLen = 200_000;
+    const truncated = logs.length > maxLen ? logs.slice(0, maxLen) + "\n\n[...truncated — log exceeded 200KB]" : logs;
+    return { content: [{ type: "text", text: truncated }] };
+  }
+);
+
 // ─── Issues Summary ──────────────────────────────────────────────────────────
 
 server.tool(

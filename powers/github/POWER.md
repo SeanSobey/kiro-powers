@@ -229,6 +229,16 @@ list_workflow_runs with owner="user", repo="my-repo", workflow_id="ci.yml", stat
 get_workflow_run with owner="user", repo="my-repo", run_id=123456
 ```
 
+**List jobs for a run:**
+```
+list_workflow_run_jobs with owner="user", repo="my-repo", run_id=123456
+```
+
+**Get job logs (plain text):**
+```
+get_workflow_job_logs with owner="user", repo="my-repo", job_id=789012
+```
+
 **Trigger a workflow:**
 ```
 trigger_workflow with owner="user", repo="my-repo", workflow_id="deploy.yml", ref="main", inputs={"environment": "production"}
