@@ -3,7 +3,7 @@ name: "playwright"
 version: "1.0.0"
 displayName: "🎭 Playwright"
 description: "Browser automation via Playwright MCP. Navigate pages, click elements, fill forms, take screenshots, capture accessibility snapshots, and run JavaScript in real browsers from your AI assistant."
-keywords: ["@playwright"]
+keywords: ["@playwright", "playwright"]
 author: "Microsoft"
 ---
 

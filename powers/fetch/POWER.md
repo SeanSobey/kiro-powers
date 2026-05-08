@@ -3,7 +3,7 @@ name: "fetch"
 version: "1.0.1"
 displayName: "🌐 Fetch"
 description: "Fetch and extract content from URLs via MCP. Supports HTML pages, text files, and images."
-keywords: ["@fetch"]
+keywords: ["@fetch", "url", "http", "web"]
 author: "Kiro Community"
 ---
 

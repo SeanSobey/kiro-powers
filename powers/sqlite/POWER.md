@@ -3,7 +3,7 @@ name: "sqlite"
 version: "1.0.0"
 displayName: "🗃️ SQLite"
 description: "SQLite database operations via MCP. Query, inspect, and manage SQLite databases with full CRUD support, schema introspection, and custom SQL execution from your AI assistant."
-keywords: ["@sqlite"]
+keywords: ["@sqlite", "sqlite", "database"]
 author: "Kiro Community"
 ---
 

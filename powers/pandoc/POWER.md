@@ -3,7 +3,7 @@ name: "pandoc"
 version: "1.0.0"
 displayName: "🔄 Pandoc"
 description: "Convert Markdown to PDF, DOCX, HTML, LaTeX, EPUB, and 10+ other document formats via MCP. Powered by Pandoc."
-keywords: ["@pandoc"]
+keywords: ["@pandoc", "convert"]
 author: "Kiro Community"
 ---
 

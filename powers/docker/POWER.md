@@ -3,7 +3,7 @@ name: "docker"
 version: "1.0.0"
 displayName: "🐳 Docker"
 description: "Manage Docker containers, images, volumes, and networks via MCP. List, create, start, stop, remove containers, build images, and inspect logs — all from your AI assistant."
-keywords: ["@docker"]
+keywords: ["@docker", "docker"]
 author: "Sean Sobey"
 ---
 
