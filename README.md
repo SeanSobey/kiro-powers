@@ -72,6 +72,20 @@ Fetch and extract content from URLs as markdown, text, or raw HTML.
 | URL | `http://localhost:3000/fetch/mcp` |
 | Env vars | None |
 
+<details>
+<summary>MCP config</summary>
+
+Add to your `mcp.json` (e.g. `.kiro/settings/mcp.json`):
+
+```json
+"fetch": {
+  "url": "http://localhost:3000/fetch/mcp",
+  "autoApprove": ["fetch_url"]
+}
+```
+
+</details>
+
 ### GitHub
 
 Full GitHub platform operations. Includes a custom `github-extras` server for labels, milestones, releases, workflows, gists, collaborators, tags, and projects.
