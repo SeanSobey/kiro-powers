@@ -19,7 +19,7 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | API-only | context7, fetch, github, github-extras, notion, youtube | Pure network services, no host access needed |
 | Staging | chart, markitdown, pandoc, pdf-reader | Read/write files via a shared staging volume |
 | CDP | chrome-devtools | Connects to Chrome on the host via DevTools Protocol |
-| Host-only | filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
+| Host-only | docker, filesystem, git, npm, playwright, sqlite | Need direct host access (Docker socket, filesystem, etc.) |
 
 ## Quick Start
 
@@ -35,6 +35,7 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | [Chart Generator](#chart-generator) | Docker (staging) | Generate charts using Chart.js v4 |
 | [Chrome DevTools](#chrome-devtools) | Docker (CDP) | Control Chrome — navigate, click, screenshot, Lighthouse |
 | [Context7](#context7) | Docker | Live documentation and code examples for any library |
+| [Docker](#docker) | Host (stdio) | Manage containers, images, volumes, and networks |
 | [Fetch](#fetch) | Docker | Fetch and extract content from URLs |
 | [Filesystem](#filesystem) | Host (disabled) | Sandboxed local file operations |
 | [Git](#git) | Host (disabled) | Comprehensive Git operations |
@@ -194,9 +195,47 @@ Steering: `testing-and-debugging`, `performance-and-audits`
 
 ---
 
-## Host-Only Powers (Disabled)
+## Host-Only Powers
 
-These powers need direct host access and are disabled by default. Enable them in `mcp.json` to run via stdio. Docker configs exist commented out in `docker-compose.yml`.
+These powers need direct host access and run via stdio.
+
+### Docker
+
+Manage Docker containers, images, volumes, and networks. List, create, start, stop, remove containers, build images, fetch logs, and orchestrate infrastructure.
+
+| | |
+|---|---|
+| Image | [`mcp-server-docker:latest`](https://github.com/ckreiling/mcp-server-docker) |
+| Command | `docker run -i --rm -v //var/run/docker.sock:/var/run/docker.sock mcp-server-docker:latest` |
+| Prerequisites | Docker Engine running, `mcp-server-docker` image built locally |
+
+<details>
+<summary>MCP config</summary>
+
+```json
+"docker-mcp": {
+  "command": "docker",
+  "args": [
+    "run", "-i", "--rm", "--name", "kiro-mcp-docker",
+    "-v", "//var/run/docker.sock:/var/run/docker.sock",
+    "mcp-server-docker:latest"
+  ],
+  "autoApprove": ["list_containers", "fetch_container_logs"]
+}
+```
+
+</details>
+
+<details>
+<summary>Build the server image</summary>
+
+```bash
+docker build -t mcp-server-docker:latest https://github.com/ckreiling/mcp-server-docker.git
+```
+
+</details>
+
+Steering: `container-workflows`, `infrastructure`
 
 ### Filesystem
 
