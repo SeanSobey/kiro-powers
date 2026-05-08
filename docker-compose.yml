@@ -17,6 +17,14 @@
 #   4. Powers connect to http://localhost:3000/<server-name>/mcp
 # ─────────────────────────────────────────────────────────────────────────────
 
+x-healthcheck: &healthcheck
+  healthcheck:
+    test: ["CMD-SHELL", "node -e 'require(\"http\").get(\"http://localhost:8000/healthz\",r=>{process.exit(r.statusCode===200?0:1)}).on(\"error\",()=>process.exit(1))'"]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+    start_period: 15s
+
 x-node-service: &node-service
   restart: unless-stopped
   build:
@@ -30,6 +38,7 @@ x-node-service: &node-service
     resources:
       limits:
         memory: 256M
+  <<: *healthcheck
 
 services:
   # ── nginx reverse proxy ──────────────────────────────────────────────────
@@ -57,7 +66,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "@upstash/context7-mcp@2.2.3"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/context7-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/context7-mcp", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     environment:
       NODE_OPTIONS: "--max-old-space-size=128"
       CONTEXT7_API_KEY: ${CONTEXT7_API_KEY:-}
@@ -70,7 +79,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "fetch-mcp@0.0.5"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/fetch-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/fetch-mcp", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
 
   # ── github ───────────────────────────────────────────────────────────────
   github:
@@ -80,7 +89,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "@modelcontextprotocol/server-github"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-github", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-github", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     environment:
       NODE_OPTIONS: "--max-old-space-size=128"
       GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
@@ -99,7 +108,7 @@ services:
       resources:
         limits:
           memory: 256M
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /app/server.js", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /app/server.js", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     environment:
       NODE_OPTIONS: "--max-old-space-size=128"
       GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
@@ -112,7 +121,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "@notionhq/notion-mcp-server"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/notion-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/notion-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     environment:
       NODE_OPTIONS: "--max-old-space-size=128"
       OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer ${NOTION_API_KEY}","Notion-Version":"2022-06-28"}'
@@ -129,7 +138,7 @@ services:
       resources:
         limits:
           memory: 256M
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/youtube-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/youtube-mcp", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     environment:
       NODE_OPTIONS: "--max-old-space-size=128"
       YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
@@ -146,7 +155,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "@ax-crew/chartjs-mcp-server@3.2.1"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chartjs-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chartjs-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     volumes:
       - ${STAGING_DIR}/chart:/staging
 
@@ -164,7 +173,7 @@ services:
       resources:
         limits:
           memory: 512M
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     volumes:
       - ${STAGING_DIR}/pandoc:/staging
 
@@ -182,7 +191,7 @@ services:
       resources:
         limits:
           memory: 384M
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "uv run /srv/server.py", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     volumes:
       - ${STAGING_DIR}/markitdown:/staging
 
@@ -194,7 +203,7 @@ services:
       dockerfile: docker/node.Dockerfile
       args:
         MCP_PACKAGE: "@sylphx/pdf-reader-mcp@2.3.1"
-    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/pdf-reader-mcp", "--outputTransport", "streamableHttp", "--port", "8000"]
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/pdf-reader-mcp", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
     volumes:
       - ${STAGING_DIR}/pdf-reader:/staging
 
@@ -212,7 +221,7 @@ services:
   #       MCP_PACKAGE: "chrome-devtools-mcp@0.23.0"
   #   extra_hosts:
   #     - "host.docker.internal:host-gateway"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chrome-devtools-mcp --no-usage-statistics --browser-url=http://host.docker.internal:9222", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/chrome-devtools-mcp --no-usage-statistics --browser-url=http://host.docker.internal:9222", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Disabled — host-only powers, uncomment + add to nginx depends_on to enable
@@ -226,7 +235,7 @@ services:
   #     dockerfile: docker/node.Dockerfile
   #     args:
   #       MCP_PACKAGE: "@modelcontextprotocol/server-filesystem@2026.1.14"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-filesystem /workspace", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-server-filesystem /workspace", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
   #   volumes:
   #     - D:/Projects:/workspace/projects
   #     - D:/Data:/workspace/data
@@ -239,7 +248,7 @@ services:
   #     dockerfile: docker/node.Dockerfile
   #     args:
   #       MCP_PACKAGE: "@cyanheads/git-mcp-server@2.15.0"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/git-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/git-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
 
   # ── npm ──────────────────────────────────────────────────────────────────
   # npm:
@@ -249,7 +258,7 @@ services:
   #     dockerfile: docker/node.Dockerfile
   #     args:
   #       MCP_PACKAGE: "npmplus-mcp-server@12.0.19"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/npmplus-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/npmplus-mcp-server", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
 
   # ── playwright ───────────────────────────────────────────────────────────
   # playwright:
@@ -259,7 +268,7 @@ services:
   #     dockerfile: docker/playwright-local.Dockerfile
   #   extra_hosts:
   #     - "host.docker.internal:host-gateway"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-playwright --cdp-endpoint http://host.docker.internal:9222", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-playwright --cdp-endpoint http://host.docker.internal:9222", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
 
   # ── sqlite ───────────────────────────────────────────────────────────────
   # sqlite:
@@ -269,6 +278,6 @@ services:
   #     dockerfile: docker/node.Dockerfile
   #     args:
   #       MCP_PACKAGE: "mcp-sqlite"
-  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-sqlite /data/database.sqlite", "--outputTransport", "streamableHttp", "--port", "8000"]
+  #   entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "node /srv/node_modules/.bin/mcp-sqlite /data/database.sqlite", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
   #   volumes:
   #     - D:/Databases/myapp:/data/myapp
