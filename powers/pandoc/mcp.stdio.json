@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "pandoc-python": {
+      "command": "uv",
+      "args": ["run", "server.py"],
+      "cwd": "${powerDir}",
+      "autoApprove": ["convert_document"]
+    }
+  }
+}

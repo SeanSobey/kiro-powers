@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "fetch-nodejs": {
+      "command": "npx",
+      "args": ["-y", "fetch-mcp@0.0.5"],
+      "autoApprove": []
+    }
+  }
+}

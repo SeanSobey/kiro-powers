@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "docker-mcp-nodejs": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm", "--name", "kiro-mcp-docker",
+        "-v", "//var/run/docker.sock:/var/run/docker.sock",
+        "mcp-server-docker:latest"
+      ],
+      "autoApprove": []
+    }
+  }
+}

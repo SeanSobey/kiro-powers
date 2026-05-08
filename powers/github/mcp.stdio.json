@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "github-nodejs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github@2025.4.8"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      }
+    },
+    "github-extras-nodejs": {
+      "command": "node",
+      "args": ["${powerDir}/../../mcp/github-extras/server.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      },
+      "disabledTools": [
+        "delete_release",
+        "delete_project",
+        "delete_label",
+        "delete_milestone",
+        "delete_tag",
+        "remove_collaborator",
+        "trigger_workflow"
+      ]
+    }
+  }
+}

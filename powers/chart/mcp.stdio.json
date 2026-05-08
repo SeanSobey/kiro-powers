@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "chart-nodejs": {
+      "command": "npx",
+      "args": ["-y", "@ax-crew/chartjs-mcp-server@3.2.1"]
+    }
+  }
+}

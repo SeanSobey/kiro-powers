@@ -1,13 +1,5 @@
 {
   "mcpServers": {
-    "context7-nodejs": {
-      "disabled": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@2.2.3"
-      ]
-    },
     "context7": {
       "url": "http://localhost:3000/context7/mcp"
     }

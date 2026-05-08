@@ -1,10 +1,5 @@
 {
   "mcpServers": {
-    "chart-nodejs": {
-      "disabled": true,
-      "command": "npx",
-      "args": ["-y", "@ax-crew/chartjs-mcp-server@3.2.1"]
-    },
     "chart": {
       "url": "http://localhost:3000/chart/mcp"
     }

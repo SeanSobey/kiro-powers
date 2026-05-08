@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "markitdown-python": {
+      "command": "uv",
+      "args": ["run", "server.py"],
+      "cwd": "${powerDir}",
+      "autoApprove": []
+    }
+  }
+}
