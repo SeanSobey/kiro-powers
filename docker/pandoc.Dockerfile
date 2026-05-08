@@ -9,15 +9,18 @@ RUN apt-get update -qq && \
     pip3 install --break-system-packages --no-cache-dir uv && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
-# Pre-install Python deps so uv doesn't fetch on every start
 COPY powers/pandoc/server.py /srv/server.py
-RUN uv run /srv/server.py --help 2>/dev/null || true
 
 # supergateway
 RUN npm init -y > /dev/null 2>&1 && \
     npm install --save --omit=dev supergateway && \
     npm cache clean --force
 
-RUN addgroup --system mcp && adduser --system --ingroup mcp mcp
+RUN addgroup --system mcp && adduser --system --ingroup mcp --home /home/mcp mcp
 USER mcp
+ENV UV_CACHE_DIR=/home/mcp/.cache/uv
+
+# Pre-warm uv cache as the mcp user
+RUN uv run /srv/server.py --help 2>/dev/null || true
+
 EXPOSE 8000
