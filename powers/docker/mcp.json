@@ -1,12 +1,17 @@
 {
   "mcpServers": {
-    "docker-mcp": {
+    "docker-mcp-nodejs": {
+      "disabled": true,
       "command": "docker",
       "args": [
         "run", "-i", "--rm", "--name", "kiro-mcp-docker",
         "-v", "//var/run/docker.sock:/var/run/docker.sock",
         "mcp-server-docker:latest"
       ],
+      "autoApprove": ["list_containers", "fetch_container_logs"]
+    },
+    "docker-mcp": {
+      "url": "http://localhost:3000/docker/mcp",
       "autoApprove": ["list_containers", "fetch_container_logs"]
     }
   }

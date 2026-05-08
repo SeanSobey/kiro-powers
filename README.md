@@ -19,7 +19,8 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | API-only | context7, fetch, github, github-extras, notion, youtube | Pure network services, no host access needed |
 | Staging | chart, markitdown, pandoc, pdf-reader | Read/write files via a shared staging volume |
 | CDP | chrome-devtools | Connects to Chrome on the host via DevTools Protocol |
-| Host-only | docker, filesystem, git, npm, playwright, sqlite | Need direct host access (Docker socket, filesystem, etc.) |
+| Docker socket | docker | Manages sibling containers via Docker socket |
+| Host-only | filesystem, git, npm, playwright, sqlite | Disabled by default — need direct host access |
 
 ## Quick Start
 
@@ -35,7 +36,7 @@ All containers run as a non-root `mcp` user. The nginx proxy validates the `Host
 | [Chart Generator](#chart-generator) | Docker (staging) | Generate charts using Chart.js v4 |
 | [Chrome DevTools](#chrome-devtools) | Docker (CDP) | Control Chrome — navigate, click, screenshot, Lighthouse |
 | [Context7](#context7) | Docker | Live documentation and code examples for any library |
-| [Docker](#docker) | Host (stdio) | Manage containers, images, volumes, and networks |
+| [Docker](#docker) | Docker (socket) | Manage containers, images, volumes, and networks |
 | [Fetch](#fetch) | Docker | Fetch and extract content from URLs |
 | [Filesystem](#filesystem) | Host (disabled) | Sandboxed local file operations |
 | [Git](#git) | Host (disabled) | Comprehensive Git operations |
@@ -195,9 +196,7 @@ Steering: `testing-and-debugging`, `performance-and-audits`
 
 ---
 
-## Host-Only Powers
-
-These powers need direct host access and run via stdio.
+## Docker Socket Power
 
 ### Docker
 
@@ -206,7 +205,7 @@ Manage Docker containers, images, volumes, and networks. List, create, start, st
 | | |
 |---|---|
 | Image | [`mcp-server-docker:latest`](https://github.com/ckreiling/mcp-server-docker) |
-| Command | `docker run -i --rm -v //var/run/docker.sock:/var/run/docker.sock mcp-server-docker:latest` |
+| URL | `http://localhost:3000/docker/mcp` |
 | Prerequisites | Docker Engine running, `mcp-server-docker` image built locally |
 
 <details>
@@ -214,12 +213,7 @@ Manage Docker containers, images, volumes, and networks. List, create, start, st
 
 ```json
 "docker-mcp": {
-  "command": "docker",
-  "args": [
-    "run", "-i", "--rm", "--name", "kiro-mcp-docker",
-    "-v", "//var/run/docker.sock:/var/run/docker.sock",
-    "mcp-server-docker:latest"
-  ],
+  "url": "http://localhost:3000/docker/mcp",
   "autoApprove": ["list_containers", "fetch_container_logs"]
 }
 ```
@@ -227,7 +221,7 @@ Manage Docker containers, images, volumes, and networks. List, create, start, st
 </details>
 
 <details>
-<summary>Build the server image</summary>
+<summary>Build the base server image</summary>
 
 ```bash
 docker build -t mcp-server-docker:latest https://github.com/ckreiling/mcp-server-docker.git
@@ -236,6 +230,12 @@ docker build -t mcp-server-docker:latest https://github.com/ckreiling/mcp-server
 </details>
 
 Steering: `container-workflows`, `infrastructure`
+
+---
+
+## Host-Only Powers (Disabled)
+
+These powers need direct host access and are disabled by default. Enable them in `mcp.json` to run via stdio. Docker configs exist commented out in `docker-compose.yml`.
 
 ### Filesystem
 
@@ -325,6 +325,7 @@ docker compose down     # Stop everything
 | File | Used by | Description |
 |------|---------|-------------|
 | `docker/node.Dockerfile` | Most services | Generic Node.js + supergateway + one MCP package (via `MCP_PACKAGE` build arg) |
+| `docker/docker-mcp.Dockerfile` | docker | Wraps mcp-server-docker image with Node.js + supergateway for HTTP transport |
 | `docker/local-server.Dockerfile` | github-extras | Copies and installs a local Node.js MCP server |
 | `docker/markitdown.Dockerfile` | markitdown | Python + Node.js hybrid for MarkItDown |
 | `docker/pandoc.Dockerfile` | pandoc | Python + Node.js + LaTeX for Pandoc |

@@ -256,7 +256,11 @@ start_container with container_id="my-redis"
 
 ## Configuration
 
-This power runs via stdio using `docker run`. The MCP server container needs access to the Docker socket to manage sibling containers. Auto-approved tools (`list_containers`, `fetch_container_logs`) are read-only operations safe for unattended use.
+Default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root.
+
+A disabled `docker-mcp-nodejs` entry in `mcp.json` is available for local stdio fallback (runs the MCP server as a Docker container directly).
+
+**Important:** The Docker MCP server needs access to the Docker socket to manage containers. The compose service mounts it automatically. For the stdio fallback, the socket is mounted via the `-v` flag in the `docker run` args.
 
 ---
 
