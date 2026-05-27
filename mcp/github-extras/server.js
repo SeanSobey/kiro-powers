@@ -573,137 +573,383 @@ server.tool(
   }
 );
 
-// ─── Projects (v2 REST API) ─────────────────────────────────────────────────
+// ─── Projects (v2 GraphQL API) ───────────────────────────────────────────────
+
+async function ghGraphQL(query, variables = {}) {
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: HEADERS,
+    body: JSON.stringify({ query, variables }),
+  });
+  const data = await res.json();
+  if (!res.ok) return { ok: false, status: res.status, data };
+  if (data.errors) return { ok: false, status: 200, data: { errors: data.errors } };
+  return { ok: true, data: data.data };
+}
+
+function graphqlError(status, data) {
+  return {
+    content: [{ type: "text", text: `GitHub GraphQL error (${status}): ${JSON.stringify(data)}` }],
+    isError: true,
+  };
+}
 
 server.tool(
   "list_org_projects",
-  "List projects for an organization",
+  "List projects (v2) for an organization",
   {
-    org: z.string().describe("Organization name"),
-    per_page: z.number().optional().describe("Results per page (max 100)"),
-    page: z.number().optional().describe("Page number"),
+    org: z.string().describe("Organization login name"),
+    first: z.number().optional().describe("Number of projects to return (max 100, default 20)"),
+    after: z.string().optional().describe("Cursor for pagination"),
   },
-  async ({ org, per_page, page }) => {
+  async ({ org, first, after }) => {
     if (!GITHUB_TOKEN) return tokenError();
-    const params = new URLSearchParams();
-    if (per_page) params.set("per_page", String(per_page));
-    if (page) params.set("page", String(page));
-    const qs = params.toString();
-    const res = await ghFetch(`/orgs/${org}/projects${qs ? `?${qs}` : ""}`);
-    const data = await res.json();
-    if (!res.ok) return apiError(res.status, data);
-    return ok(data.map((p) => ({ id: p.id, number: p.number, title: p.title, description: p.description, public: p.public, closed_at: p.closed_at, created_at: p.created_at })));
+    const query = `
+      query($org: String!, $first: Int!, $after: String) {
+        organization(login: $org) {
+          projectsV2(first: $first, after: $after) {
+            nodes {
+              id
+              number
+              title
+              shortDescription
+              public
+              closed
+              url
+              createdAt
+              updatedAt
+            }
+            pageInfo { hasNextPage endCursor }
+            totalCount
+          }
+        }
+      }`;
+    const result = await ghGraphQL(query, { org, first: first || 20, after: after || null });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    const { nodes, pageInfo, totalCount } = result.data.organization.projectsV2;
+    return ok({ projects: nodes, pageInfo, totalCount });
   }
 );
 
 server.tool(
-  "list_repo_projects",
-  "List projects for a repository",
+  "list_user_projects",
+  "List projects (v2) for a user",
   {
-    owner: z.string().describe("Repository owner"),
-    repo: z.string().describe("Repository name"),
-    per_page: z.number().optional().describe("Results per page (max 100)"),
-    page: z.number().optional().describe("Page number"),
+    user: z.string().describe("GitHub username"),
+    first: z.number().optional().describe("Number of projects to return (max 100, default 20)"),
+    after: z.string().optional().describe("Cursor for pagination"),
   },
-  async ({ owner, repo, per_page, page }) => {
+  async ({ user, first, after }) => {
     if (!GITHUB_TOKEN) return tokenError();
-    const params = new URLSearchParams();
-    if (per_page) params.set("per_page", String(per_page));
-    if (page) params.set("page", String(page));
-    const qs = params.toString();
-    const res = await ghFetch(`/repos/${owner}/${repo}/projects${qs ? `?${qs}` : ""}`);
-    const data = await res.json();
-    if (!res.ok) return apiError(res.status, data);
-    return ok(data.map((p) => ({ id: p.id, number: p.number, title: p.title, description: p.description, public: p.public, closed_at: p.closed_at, created_at: p.created_at })));
-  }
-);
-
-server.tool(
-  "create_org_project",
-  "Create a project for an organization",
-  {
-    org: z.string().describe("Organization name"),
-    title: z.string().describe("Project title"),
-    body: z.string().optional().describe("Project description"),
-  },
-  async ({ org, title, body }) => {
-    if (!GITHUB_TOKEN) return tokenError();
-    const res = await ghFetch(`/orgs/${org}/projects`, {
-      method: "POST", body: JSON.stringify({ title, body }),
-    });
-    const data = await res.json();
-    return res.ok ? ok({ id: data.id, number: data.number, title: data.title, html_url: data.html_url, created_at: data.created_at }) : apiError(res.status, data);
-  }
-);
-
-server.tool(
-  "create_repo_project",
-  "Create a project for a repository",
-  {
-    owner: z.string().describe("Repository owner"),
-    repo: z.string().describe("Repository name"),
-    title: z.string().describe("Project title"),
-    body: z.string().optional().describe("Project description"),
-  },
-  async ({ owner, repo, title, body }) => {
-    if (!GITHUB_TOKEN) return tokenError();
-    const res = await ghFetch(`/repos/${owner}/${repo}/projects`, {
-      method: "POST", body: JSON.stringify({ title, body }),
-    });
-    const data = await res.json();
-    return res.ok ? ok({ id: data.id, number: data.number, title: data.title, html_url: data.html_url, created_at: data.created_at }) : apiError(res.status, data);
+    const query = `
+      query($user: String!, $first: Int!, $after: String) {
+        user(login: $user) {
+          projectsV2(first: $first, after: $after) {
+            nodes {
+              id
+              number
+              title
+              shortDescription
+              public
+              closed
+              url
+              createdAt
+              updatedAt
+            }
+            pageInfo { hasNextPage endCursor }
+            totalCount
+          }
+        }
+      }`;
+    const result = await ghGraphQL(query, { user, first: first || 20, after: after || null });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    const { nodes, pageInfo, totalCount } = result.data.user.projectsV2;
+    return ok({ projects: nodes, pageInfo, totalCount });
   }
 );
 
 server.tool(
   "get_project",
-  "Get a project by ID",
+  "Get a project (v2) by owner and project number",
   {
-    project_id: z.number().describe("Project ID"),
+    owner: z.string().describe("Organization or user login"),
+    number: z.number().describe("Project number (from the project URL)"),
+    owner_type: z.enum(["organization", "user"]).optional().describe("Owner type (default: organization)"),
   },
-  async ({ project_id }) => {
+  async ({ owner, number, owner_type }) => {
     if (!GITHUB_TOKEN) return tokenError();
-    const res = await ghFetch(`/projects/${project_id}`);
-    const data = await res.json();
-    return res.ok ? ok({ id: data.id, number: data.number, title: data.title, description: data.body, state: data.state, html_url: data.html_url, created_at: data.created_at }) : apiError(res.status, data);
+    const type = owner_type || "organization";
+    const query = `
+      query($owner: String!, $number: Int!) {
+        ${type}(login: $owner) {
+          projectV2(number: $number) {
+            id
+            number
+            title
+            shortDescription
+            readme
+            public
+            closed
+            url
+            createdAt
+            updatedAt
+            fields(first: 30) {
+              nodes {
+                ... on ProjectV2FieldCommon {
+                  id
+                  name
+                  dataType
+                }
+              }
+            }
+          }
+        }
+      }`;
+    const result = await ghGraphQL(query, { owner, number });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    const project = result.data[type].projectV2;
+    return ok(project);
+  }
+);
+
+server.tool(
+  "create_project",
+  "Create a new project (v2) for an organization or user",
+  {
+    owner: z.string().describe("Organization or user login (owner of the new project)"),
+    title: z.string().describe("Project title"),
+  },
+  async ({ owner, title }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    // First resolve the owner node ID
+    const ownerQuery = `
+      query($login: String!) {
+        repositoryOwner(login: $login) { id }
+      }`;
+    const ownerResult = await ghGraphQL(ownerQuery, { login: owner });
+    if (!ownerResult.ok) return graphqlError(ownerResult.status, ownerResult.data);
+    const ownerId = ownerResult.data.repositoryOwner?.id;
+    if (!ownerId) return graphqlError(404, { message: `Owner '${owner}' not found` });
+
+    const mutation = `
+      mutation($ownerId: ID!, $title: String!) {
+        createProjectV2(input: { ownerId: $ownerId, title: $title }) {
+          projectV2 {
+            id
+            number
+            title
+            url
+            createdAt
+          }
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { ownerId, title });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok(result.data.createProjectV2.projectV2);
   }
 );
 
 server.tool(
   "update_project",
-  "Update a project",
+  "Update a project (v2) settings",
   {
-    project_id: z.number().describe("Project ID"),
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
     title: z.string().optional().describe("New title"),
-    body: z.string().optional().describe("New description"),
-    state: z.enum(["open", "closed"]).optional().describe("New state"),
+    short_description: z.string().optional().describe("New short description"),
+    readme: z.string().optional().describe("New README content (Markdown)"),
+    closed: z.boolean().optional().describe("Set to true to close, false to reopen"),
+    public: z.boolean().optional().describe("Set project visibility"),
   },
-  async ({ project_id, title, body, state }) => {
+  async ({ project_id, title, short_description, readme, closed, public: isPublic }) => {
     if (!GITHUB_TOKEN) return tokenError();
-    const payload = {};
-    if (title) payload.title = title;
-    if (body !== undefined) payload.body = body;
-    if (state) payload.state = state;
-    const res = await ghFetch(`/projects/${project_id}`, {
-      method: "PATCH", body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    return res.ok ? ok({ id: data.id, title: data.title, state: data.state }) : apiError(res.status, data);
+    const input = { projectId: project_id };
+    if (title !== undefined) input.title = title;
+    if (short_description !== undefined) input.shortDescription = short_description;
+    if (readme !== undefined) input.readme = readme;
+    if (closed !== undefined) input.closed = closed;
+    if (isPublic !== undefined) input.public = isPublic;
+
+    const mutation = `
+      mutation($input: UpdateProjectV2Input!) {
+        updateProjectV2(input: $input) {
+          projectV2 {
+            id
+            number
+            title
+            shortDescription
+            readme
+            public
+            closed
+            url
+            updatedAt
+          }
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { input });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok(result.data.updateProjectV2.projectV2);
   }
 );
 
 server.tool(
   "delete_project",
-  "Delete a project",
+  "Delete a project (v2)",
   {
-    project_id: z.number().describe("Project ID"),
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
   },
   async ({ project_id }) => {
     if (!GITHUB_TOKEN) return tokenError();
-    const res = await ghFetch(`/projects/${project_id}`, { method: "DELETE" });
-    if (res.status === 204) return ok({ deleted: project_id });
-    const data = await res.json();
-    return apiError(res.status, data);
+    const mutation = `
+      mutation($projectId: ID!) {
+        deleteProjectV2(input: { projectId: $projectId }) {
+          projectV2 { id title }
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { projectId: project_id });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok({ deleted: result.data.deleteProjectV2.projectV2 });
+  }
+);
+
+server.tool(
+  "list_project_items",
+  "List items in a project (v2)",
+  {
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
+    first: z.number().optional().describe("Number of items to return (max 100, default 20)"),
+    after: z.string().optional().describe("Cursor for pagination"),
+  },
+  async ({ project_id, first, after }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const query = `
+      query($projectId: ID!, $first: Int!, $after: String) {
+        node(id: $projectId) {
+          ... on ProjectV2 {
+            items(first: $first, after: $after) {
+              nodes {
+                id
+                type
+                createdAt
+                updatedAt
+                fieldValues(first: 10) {
+                  nodes {
+                    ... on ProjectV2ItemFieldTextValue { text field { ... on ProjectV2FieldCommon { name } } }
+                    ... on ProjectV2ItemFieldNumberValue { number field { ... on ProjectV2FieldCommon { name } } }
+                    ... on ProjectV2ItemFieldDateValue { date field { ... on ProjectV2FieldCommon { name } } }
+                    ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2FieldCommon { name } } }
+                    ... on ProjectV2ItemFieldIterationValue { title startDate duration field { ... on ProjectV2FieldCommon { name } } }
+                  }
+                }
+                content {
+                  ... on Issue { number title state url }
+                  ... on PullRequest { number title state url }
+                  ... on DraftIssue { title body }
+                }
+              }
+              pageInfo { hasNextPage endCursor }
+              totalCount
+            }
+          }
+        }
+      }`;
+    const result = await ghGraphQL(query, { projectId: project_id, first: first || 20, after: after || null });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    const { nodes, pageInfo, totalCount } = result.data.node.items;
+    return ok({ items: nodes, pageInfo, totalCount });
+  }
+);
+
+server.tool(
+  "add_project_item",
+  "Add an issue or pull request to a project (v2)",
+  {
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
+    content_id: z.string().describe("Node ID of the issue or pull request to add"),
+  },
+  async ({ project_id, content_id }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const mutation = `
+      mutation($projectId: ID!, $contentId: ID!) {
+        addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+          item { id }
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { projectId: project_id, contentId: content_id });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok({ item_id: result.data.addProjectV2ItemById.item.id });
+  }
+);
+
+server.tool(
+  "add_project_draft_issue",
+  "Add a draft issue to a project (v2)",
+  {
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
+    title: z.string().describe("Draft issue title"),
+    body: z.string().optional().describe("Draft issue body (Markdown)"),
+  },
+  async ({ project_id, title, body }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const mutation = `
+      mutation($projectId: ID!, $title: String!, $body: String) {
+        addProjectV2DraftIssue(input: { projectId: $projectId, title: $title, body: $body }) {
+          projectItem { id }
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { projectId: project_id, title, body: body || null });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok({ item_id: result.data.addProjectV2DraftIssue.projectItem.id });
+  }
+);
+
+server.tool(
+  "update_project_item_field",
+  "Update a field value on a project item (v2)",
+  {
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
+    item_id: z.string().describe("Project item node ID (starts with PVTI_)"),
+    field_id: z.string().describe("Field node ID (get from get_project fields)"),
+    value: z.object({
+      text: z.string().optional().describe("For text fields"),
+      number: z.number().optional().describe("For number fields"),
+      date: z.string().optional().describe("For date fields (ISO 8601, e.g. 2025-12-31)"),
+      singleSelectOptionId: z.string().optional().describe("For single select fields (option ID)"),
+      iterationId: z.string().optional().describe("For iteration fields (iteration ID)"),
+    }).describe("Field value object — provide exactly one property matching the field type"),
+  },
+  async ({ project_id, item_id, field_id, value }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const mutation = `
+      mutation($input: UpdateProjectV2ItemFieldValueInput!) {
+        updateProjectV2ItemFieldValue(input: $input) {
+          projectV2Item { id }
+        }
+      }`;
+    const input = { projectId: project_id, itemId: item_id, fieldId: field_id, value };
+    const result = await ghGraphQL(mutation, { input });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok({ item_id: result.data.updateProjectV2ItemFieldValue.projectV2Item.id });
+  }
+);
+
+server.tool(
+  "delete_project_item",
+  "Remove an item from a project (v2)",
+  {
+    project_id: z.string().describe("Project node ID (starts with PVT_)"),
+    item_id: z.string().describe("Project item node ID (starts with PVTI_)"),
+  },
+  async ({ project_id, item_id }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const mutation = `
+      mutation($projectId: ID!, $itemId: ID!) {
+        deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
+          deletedItemId
+        }
+      }`;
+    const result = await ghGraphQL(mutation, { projectId: project_id, itemId: item_id });
+    if (!result.ok) return graphqlError(result.status, result.data);
+    return ok({ deleted_item_id: result.data.deleteProjectV2Item.deletedItemId });
   }
 );
 
