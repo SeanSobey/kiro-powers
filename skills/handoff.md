@@ -45,18 +45,20 @@ branches: <active git branches worked on, if any>
    
    Bullets only. Include the build/run command if non-obvious.
 
-4. **Context** — Files, URLs, docs, or resources the next agent should read to get up to speed. These are things referenced or consulted during the session that provide necessary background:
+4. **Gotchas** — Non-obvious constraints or traps that cost time if rediscovered. Include only if the session surfaced them. Max 5 bullets. Examples: silent truncation behaviours, framework quirks, assertion pitfalls, build/deploy ordering dependencies. Skip this section if none apply.
+
+5. **Context** — Files, URLs, docs, or resources the next agent should read to get up to speed. These are things referenced or consulted during the session that provide necessary background:
    - File paths (relative to workspace root)
    - URLs (documentation, PRs, issues, design docs)
    - Steering files or specs that informed decisions
    
    For each entry: one-line description of what it contains and why it's relevant. Order by importance. Add a reading-order hint if there's a natural sequence (e.g. "Read A first, then B if working on X").
 
-5. **Next Steps** — Ordered, actionable. If the user passed arguments, treat them as the focus for the next session and weight this section accordingly. Include the exact command or tool call where possible (not just "do X" but "run `npm run build` then `POST /api/reindex`").
+6. **Next Steps** — Ordered, actionable. If the user passed arguments, treat them as the focus for the next session and weight this section accordingly. Include the exact command or tool call where possible (not just "do X" but "run `npm run build` then `POST /api/reindex`").
 
-6. **Artifacts** — Paths, URLs, commits, PRs, specs, ADRs. One-line description + reference. Never duplicate their content. Only include artifacts created or significantly modified in this session.
+7. **Artifacts** — Paths, URLs, commits, PRs, specs, ADRs. One-line description + reference. Never duplicate their content. Only include artifacts created or significantly modified in this session.
 
-7. **Suggested Skills** — Skills (by exact name) the next agent should invoke at session start, with a one-line reason.
+8. **Entities** — Optional. Domain objects, components, or relationships clarified during the session that aren't obvious from code or docs alone. Format: `Name` — one-line definition or relationship. Only include if the session produced understanding that would otherwise require re-derivation. Skip if all concepts are adequately documented.
 
 ## Rules
 
