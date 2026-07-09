@@ -1,19 +1,39 @@
 ---
 name: handoff
-description: Compact the current conversation into a handoff document for another agent to pick up.
+description: Compact the current conversation into a handoff document, or resume from an existing one.
 ---
 
-Compact the current conversation into a handoff document for another agent to pick up.
+# Handoff Skill
+
+This skill operates in two modes:
+
+## Mode 1: Resume from Handoff
+
+**Trigger:** The user provides a path to an existing handoff file (e.g. `.kiro/handoffs/2026-07-09_2130_handoff.md`), or asks to "load", "resume", "pick up", or "continue from" a handoff.
+
+**Behaviour:**
+1. Read the handoff file.
+2. Treat its contents as your working context — you are the cold-start agent it was written for.
+3. Summarise the state in 2–3 sentences so the user knows you've absorbed it.
+4. Begin working on the **Next Steps** section unless the user redirects you.
+
+Do NOT create a new handoff document in this mode.
+
+---
+
+## Mode 2: Create Handoff
+
+**Trigger:** The user asks to "create a handoff", "write a handoff", "compact this session", or there is meaningful work in the conversation that needs to be preserved.
 
 The output is a `handoff.md` — the information and detail a cold-start agent needs to continue this work without re-reading the full session history.
 
-## Output Location
+### Output Location
 
 Save to `.kiro/handoffs/` (preferred) or `.handoff/` at workspace root if `.kiro` doesn't exist.
 
 Filename: `YYYY-MM-DD_HHmm_handoff.md` (e.g. `2026-07-09_1430_handoff.md`)
 
-## Document Header
+### Document Header
 
 Start the document with a metadata block:
 
@@ -26,7 +46,7 @@ branches: <active git branches worked on, if any>
 ---
 ```
 
-## Structure
+### Structure
 
 1. **Project Context** — One paragraph max. What is this project, what does it do, what's the tech stack. A cold agent should understand the domain without reading any other file. Skip if the handoff is a continuation within the same day.
 
@@ -60,7 +80,7 @@ branches: <active git branches worked on, if any>
 
 8. **Entities** — Optional. Domain objects, components, or relationships clarified during the session that aren't obvious from code or docs alone. Format: `Name` — one-line definition or relationship. Only include if the session produced understanding that would otherwise require re-derivation. Skip if all concepts are adequately documented.
 
-## Rules
+### Rules
 
 - Redact secrets (API keys, tokens, passwords, PII) → `[REDACTED]`.
 - Prioritise decisions and context that would be lost if the conversation disappeared. Omit routine tool output and incremental debugging steps.
