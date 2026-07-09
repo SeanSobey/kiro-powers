@@ -167,6 +167,31 @@ services:
   # Staging — shared /staging volume for file I/O
   # ═══════════════════════════════════════════════════════════════════════════
 
+  # ── staging (file transfer helper) ──────────────────────────────────────
+  staging:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/local-server.Dockerfile
+      args:
+        SERVER_DIR: mcp/staging
+    expose:
+      - "8000"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    entrypoint: ["node", "/srv/node_modules/.bin/supergateway", "--stdio", "exec node /app/server.js", "--outputTransport", "streamableHttp", "--port", "8000", "--stateful", "--sessionTimeout", "300000", "--healthEndpoint", "/healthz"]
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=128"
+      STAGING_DIR: /staging
+    volumes:
+      - ${STAGING_DIR}/chart:/staging/chart
+      - ${STAGING_DIR}/markitdown:/staging/markitdown
+      - ${STAGING_DIR}/pandoc:/staging/pandoc
+      - ${STAGING_DIR}/pdf-reader:/staging/pdf-reader
+    <<: *healthcheck
+
   # ── chart ────────────────────────────────────────────────────────────────
   chart:
     <<: *node-service

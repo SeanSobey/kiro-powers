@@ -6,22 +6,21 @@ inclusion: auto
 
 This power runs in Docker and can only access files mounted at `/staging` inside the container.
 
-## Discovering the host staging path
+## File Transfer
 
-1. Read the `.env` file at `#[[file:../../.env]]`
-2. Find the `STAGING_DIR` value — this is the base host path
-3. Append `/pdf-reader` — the full host path is `STAGING_DIR/pdf-reader`
+Use the **staging** power's tools to move files in and out:
 
-This host path maps to `/staging` inside the container.
+- `stage_file(service="pdf-reader", ...)` — copy a PDF into the container's `/staging/`
+- `list_staged_files(service="pdf-reader")` — see what's currently staged
+- `clean_staging(service="pdf-reader")` — remove staged files
 
 ## Workflow
 
-1. Discover the host path as above
-2. Copy the PDF file from the workspace to `STAGING_DIR/pdf-reader` on the host
-3. Call `read_pdf` with `sources=[{ "path": "/staging/<filename>.pdf" }]`
-4. The extracted text/metadata is returned directly over MCP — no need to copy output back
+1. Stage the PDF: `stage_file(service="pdf-reader", filename="paper.pdf", sourcePath="<absolute path>")`
+2. Read it: `read_pdf(filePath="/staging/paper.pdf")`
+3. Clean up: `clean_staging(service="pdf-reader")`
 
 ## Important
 
-- Paths passed to `read_pdf` must use `/staging/` as the root, not the host path
-- Remote URLs work without staging — only local files need this workflow
+- Paths passed to this tool must use `/staging/` as the root, not the host path
+- Remote URLs (`http://`, `https://`) work without staging — only local files need this workflow

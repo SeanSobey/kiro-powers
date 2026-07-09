@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "staging": {
+      "url": "http://localhost:3000/staging/mcp",
+      "autoApprove": ["list_staged_files", "read_staged_file"]
+    },
+    "staging-nodejs": {
+      "command": "node",
+      "args": ["${powerDir}/../../mcp/staging/server.js"],
+      "disabled": true,
+      "autoApprove": ["list_staged_files", "read_staged_file"]
+    }
+  }
+}

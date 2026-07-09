@@ -30,7 +30,7 @@ No manual install needed. The `uvx` command will automatically download dependen
 Default config connects to Docker via Streamable HTTP. Run `docker compose up -d` from the repo root. Files in the staging directory are accessible at `/staging` inside the container. A disabled `markitdown-python` entry in `mcp.json` is available for local stdio fallback.
 
 ### Staging Workflow
-This power runs in Docker and can only access files inside the `/staging` volume. See the **staging** steering file for the full workflow — the AI reads `STAGING_DIR` from `${powerDir}/../../.env` at runtime to discover the host path, copies files there, and references them as `file:///staging/<filename>` in tool calls. Use `output_path="/staging/<output>.md"` to write results back to the host.
+This power runs in Docker and can only access files inside the `/staging` volume. Use the **staging** power's tools (`stage_file`, `read_staged_file`) to move files in and out — see the staging steering file for details. Reference staged files as `file:///staging/<filename>` in tool calls. Use `output_path="/staging/<output>.md"` to write results back to the host.
 
 ## Common Workflows
 

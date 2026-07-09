@@ -6,24 +6,26 @@ inclusion: auto
 
 This power runs in Docker and can only access files mounted at `/staging` inside the container.
 
-## Discovering the host staging path
+## File Transfer
 
-1. Read the `.env` file at `#[[file:../../.env]]`
-2. Find the `STAGING_DIR` value — this is the base host path
-3. Append `/pandoc` — the full host path is `STAGING_DIR/pandoc`
+Use the **staging** power's tools to move files in and out:
 
-This host path maps to `/staging` inside the container.
+- `stage_file(service="pandoc", ...)` — copy a file into the container's `/staging/`
+- `unstage_file(service="pandoc", ...)` — copy an output file from `/staging/` to the host
+- `read_staged_file(service="pandoc", ...)` — read a staged file's content directly
+- `list_staged_files(service="pandoc")` — see what's currently staged
+- `clean_staging(service="pandoc")` — remove staged files
 
 ## Workflow
 
-1. Discover the host path as above
-2. Copy the source file from the workspace to `STAGING_DIR/pandoc` on the host
-3. Call `convert_document` with `input_file="/staging/<filename>"` and `output_file="/staging/<output>.<ext>"`
-4. Copy the output file from `STAGING_DIR/pandoc` back to the workspace
+1. Stage the source file: `stage_file(service="pandoc", filename="readme.md", sourcePath="<absolute path>")`
+2. Convert: `convert_document(input_file="/staging/readme.md", output_file="/staging/readme.pdf", to_format="pdf")`
+3. Retrieve output: `unstage_file(service="pandoc", filename="readme.pdf", targetPath="<destination>")`
+4. Clean up: `clean_staging(service="pandoc")`
 
 ## Important
 
 - Paths inside the container always start with `/staging/`
 - Always set `output_file` to a `/staging/` path so the output is accessible on the host
-- For binary formats (pdf, docx, epub, odt), `output_file` is required
+- For binary formats (pdf, docx, epub, odt), use `unstage_file` to copy output to the host
 - When converting inline `contents` (no input file), staging is only needed for the output file

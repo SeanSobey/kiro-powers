@@ -27,7 +27,7 @@ Default config connects to Docker via Streamable HTTP — no local setup needed.
 A disabled `chart-nodejs` entry in `mcp.json` is available for local stdio fallback.
 
 ### Staging Workflow
-This power runs in Docker. When using `saveToFile=true` for PNG output, files must be saved under `/staging/` to be accessible on the host. See the **staging** steering file for the full workflow — the AI reads `STAGING_DIR` from `${powerDir}/../../.env` at runtime to discover the host path. For `html` and `json` output formats, content is returned directly over MCP — no staging needed.
+This power runs in Docker. When using `saveToFile=true` for PNG output, files must be saved under `/staging/` to be accessible on the host. Use the **staging** power's tools (`stage_file`, `unstage_file`, `read_staged_file`) to move files in and out — see the staging steering file for details. For `html` and `json` output formats, content is returned directly over MCP — no staging needed.
 
 ## Common Workflows
 

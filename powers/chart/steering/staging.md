@@ -6,24 +6,24 @@ inclusion: auto
 
 This power runs in Docker and can only access files mounted at `/staging` inside the container.
 
-## Discovering the host staging path
+## File Transfer
 
-1. Read the `.env` file at `#[[file:../../.env]]`
-2. Find the `STAGING_DIR` value — this is the base host path
-3. Append `/chart` — the full host path is `STAGING_DIR/chart`
+Use the **staging** power's tools to move files in and out:
 
-This host path maps to `/staging` inside the container.
+- `stage_file(service="chart", ...)` — copy a file into the container's `/staging/`
+- `unstage_file(service="chart", ...)` — copy an output file from `/staging/` to the host
+- `read_staged_file(service="chart", ...)` — read a staged file's content directly
+- `list_staged_files(service="chart")` — see what's currently staged
+- `clean_staging(service="chart")` — remove staged files
 
 ## Workflow
 
-1. Discover the host path as above
-2. Copy input files from the workspace to `STAGING_DIR/chart` on the host
-3. Call the tool using `/staging/<filename>` as the path inside the container
-4. If the tool writes output files (e.g. `saveToFile=true`), they appear in `STAGING_DIR/chart` on the host — copy them back to the workspace if needed
+1. If using `saveToFile=true` for PNG output, the file is saved under `/staging/` inside the container
+2. Use `unstage_file` to copy the PNG to the desired host location
+3. Clean up with `clean_staging`
 
 ## Important
 
-- Paths passed to this tool must use `/staging/` as the root, not the host path
-- For `saveToFile=true` (PNG output), the file is only accessible on the host if saved under `/staging/`
 - For `html` and `json` output formats, content is returned directly over MCP — no staging needed
 - Remote URLs work without staging
+- Paths passed to this tool must use `/staging/` as the root, not the host path
