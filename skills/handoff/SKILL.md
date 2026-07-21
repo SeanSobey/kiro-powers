@@ -1,6 +1,7 @@
 ---
 name: handoff
 description: Compact the current conversation into a handoff document, or resume from an existing one.
+disable-model-invocation: true
 ---
 
 # Handoff Skill
@@ -9,7 +10,7 @@ This skill operates in two modes:
 
 ## Mode 1: Resume from Handoff
 
-**Trigger:** The user provides a path to an existing handoff file (e.g. `.kiro/handoffs/2026-07-09_2130_handoff.md`), or asks to "load", "resume", "pick up", or "continue from" a handoff.
+**Trigger:** The user provides a path to an existing handoff file (e.g. `.kiro/handoffs/2026-07-09_1430_logging-improvements.md`), or asks to "load", "resume", "pick up", or "continue from" a handoff.
 
 **Behaviour:**
 1. Read the handoff file.
@@ -31,7 +32,7 @@ The output is a `handoff.md` — the information and detail a cold-start agent n
 
 Save to `.kiro/handoffs/` (preferred) or `.handoff/` at workspace root if `.kiro` doesn't exist.
 
-Filename: `YYYY-MM-DD_HHmm_handoff.md` (e.g. `2026-07-09_1430_handoff.md`)
+Filename: `{YYYY-MM-DD_HHmm}_{topic-slug}.md` (e.g. `2026-07-09_1430_logging-improvements.md`)
 
 ### Document Header
 
