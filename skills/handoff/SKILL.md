@@ -32,7 +32,7 @@ The output is a `handoff.md` — the information and detail a cold-start agent n
 
 Save to `.kiro/handoffs/` (preferred) or `.handoff/` at workspace root if `.kiro` doesn't exist.
 
-Filename: `{YYYY-MM-DD_HHmm}_{topic-slug}.md` (e.g. `2026-07-09_1430_logging-improvements.md`)
+Filename: `{YYYY-MM-DD_HHmm}_{topic-slug}.md` (e.g. `2026-07-09_1430_logging-improvements.md`). Note the time is the time of the handoff invocation.
 
 ### Document Header
 
