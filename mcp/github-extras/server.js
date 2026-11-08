@@ -1,6 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { readFile } from "node:fs/promises";
+import { extname } from "node:path";
 
 const GITHUB_TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
 
@@ -1054,6 +1056,90 @@ server.tool(
         labels: i.labels.map((l) => ({ name: l.name, color: l.color })),
       }));
     return ok(issues);
+  }
+);
+
+// ─── Evidence ────────────────────────────────────────────────────────────────
+
+const EVIDENCE_TYPES = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
+const EVIDENCE_MAX_BYTES = 10 * 1024 * 1024;
+
+// Creates `branch` as an orphan (no parents) holding only a README, unless it already exists.
+async function ensureEvidenceBranch(owner, repo, branch) {
+  const existing = await ghFetch(`/repos/${owner}/${repo}/git/ref/heads/${branch}`);
+  if (existing.ok) return null;
+  if (existing.status !== 404) return apiError(existing.status, await existing.json().catch(() => ({})));
+  const readme = `# ${branch}\n\nOrphan branch holding before/after screenshots for bug fixes, one folder per issue or PR (\`bugs/<number>/\`).\nWritten by the github-extras \`attach_evidence\` tool. Not code: never merge it.\n`;
+  const steps = [
+    ["git/trees", () => ({ tree: [{ path: "README.md", mode: "100644", type: "blob", content: readme }] })],
+    ["git/commits", (tree) => ({ message: `evidence: create ${branch}`, tree: tree.sha, parents: [] })],
+    ["git/refs", (commit) => ({ ref: `refs/heads/${branch}`, sha: commit.sha })],
+  ];
+  let prev;
+  for (const [endpoint, makeBody] of steps) {
+    const res = await ghFetch(`/repos/${owner}/${repo}/${endpoint}`, { method: "POST", body: JSON.stringify(makeBody(prev)) });
+    prev = await res.json();
+    if (!res.ok) return apiError(res.status, prev);
+  }
+  return null;
+}
+
+server.tool(
+  "attach_evidence",
+  "Attach local screenshots to an issue or PR: commits them to an orphan evidence branch and posts one comment embedding them",
+  {
+    owner: z.string().describe("Repository owner"),
+    repo: z.string().describe("Repository name"),
+    issue_number: z.number().describe("Issue or PR number"),
+    files: z.array(z.object({
+      path: z.string().describe("Absolute local path to a .png/.jpg/.gif/.webp file (max 10 MB)"),
+      label: z.string().describe("Short caption, e.g. \"before\" or \"after\""),
+    })).min(1).describe("Images to attach, in display order"),
+    body: z.string().optional().describe("Markdown placed above the images"),
+    branch: z.string().optional().describe("Evidence branch (default: bug-evidence; created as an orphan if missing)"),
+    dry_run: z.boolean().optional().describe("Upload the images but return the comment markdown instead of posting it"),
+  },
+  async ({ owner, repo, issue_number, files, body, branch = "bug-evidence", dry_run }) => {
+    if (!GITHUB_TOKEN) return tokenError();
+    const loaded = [];
+    for (const f of files) {
+      const ext = extname(f.path).toLowerCase();
+      if (!EVIDENCE_TYPES.includes(ext)) return { content: [{ type: "text", text: `Error: ${f.path} is not a .png/.jpg/.gif/.webp file.` }], isError: true };
+      let data;
+      try {
+        data = await readFile(f.path);
+      } catch (e) {
+        return { content: [{ type: "text", text: `Error: cannot read ${f.path} (${e.code ?? e.message}).` }], isError: true };
+      }
+      if (data.length > EVIDENCE_MAX_BYTES) return { content: [{ type: "text", text: `Error: ${f.path} is over 10 MB.` }], isError: true };
+      loaded.push({ ...f, ext, data });
+    }
+
+    const branchError = await ensureEvidenceBranch(owner, repo, branch);
+    if (branchError) return branchError;
+
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15); // yyyyMMdd-HHmmss UTC
+    const images = [];
+    for (const f of loaded) {
+      const slug = f.label.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "image";
+      const path = `bugs/${issue_number}/${stamp}-${slug}${f.ext}`;
+      const res = await ghFetch(`/repos/${owner}/${repo}/contents/${path}`, {
+        method: "PUT",
+        body: JSON.stringify({ message: `evidence: #${issue_number} ${f.label}`, content: f.data.toString("base64"), branch }),
+      });
+      const data = await res.json();
+      if (!res.ok) return apiError(res.status, data);
+      images.push({ label: f.label, path, url: `https://github.com/${owner}/${repo}/blob/${branch}/${path}?raw=true` });
+    }
+
+    const comment = [body, ...images.map((i) => `**${i.label}**\n\n![${i.label}](${i.url})`)].filter(Boolean).join("\n\n");
+    if (dry_run) return ok({ comment_url: null, comment, images });
+    const res = await ghFetch(`/repos/${owner}/${repo}/issues/${issue_number}/comments`, {
+      method: "POST", body: JSON.stringify({ body: comment }),
+    });
+    const data = await res.json();
+    if (!res.ok) return apiError(res.status, data);
+    return ok({ comment_url: data.html_url, images });
   }
 );
 
